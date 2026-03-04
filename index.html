@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BHARAT MONITOR — India Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --saffron: #FF9933;
+  --green: #138808;
+  --navy: #000080;
+  --bg: #04080d;
+  --bg2: #070d14;
+  --bg3: #0a1520;
+  --panel: rgba(7,13,22,0.96);
+  --border: rgba(255,153,51,0.18);
+  --border-hi: rgba(255,153,51,0.65);
+  --text: #b8ccd8;
+  --dim: #4a6475;
+  --accent: #FF9933;
+  --a2: #138808;
+  --a3: #4fc3f7;
+  --red: #ff3d3d;
+  --yellow: #ffd700;
+  --glow: 0 0 24px rgba(255,153,51,0.25);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100vh; width:100vw; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Rajdhani',sans-serif; }
+
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);
+}
+
+/* ── TOPBAR ── */
+#topbar {
+  height:46px; background:rgba(4,8,13,0.99); border-bottom:1px solid var(--border-hi);
+  display:flex; align-items:center; padding:0 14px; gap:12px; position:relative; z-index:200;
+  box-shadow:0 2px 18px rgba(255,153,51,0.18);
+}
+.logo { font-family:'Orbitron',monospace; font-size:17px; font-weight:900; color:var(--saffron); letter-spacing:3px; text-shadow:0 0 18px rgba(255,153,51,0.7); }
+.logo em { color:var(--a3); font-style:normal; }
+.vsep { width:1px; height:26px; background:var(--border); flex-shrink:0; }
+#clock { font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--accent); letter-spacing:2px; }
+.pill { padding:2px 9px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; border-radius:1px; display:flex; align-items:center; gap:5px; }
+.pill.live { background:rgba(19,136,8,0.15); border:1px solid #138808; color:#55e055; }
+.pill.warn { background:rgba(255,61,61,0.15); border:1px solid var(--red); color:#ff7777; }
+.blink { width:5px; height:5px; border-radius:50%; background:currentColor; animation:blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+.spacer { flex:1; }
+.nav-tab { padding:5px 14px; font-family:'Rajdhani',sans-serif; font-weight:600; font-size:12px; letter-spacing:1.5px; cursor:pointer; border:1px solid transparent; background:transparent; color:var(--dim); transition:all .18s; text-transform:uppercase; }
+.nav-tab:hover { color:var(--accent); border-color:var(--border); }
+.nav-tab.active { color:var(--accent); border-color:var(--border-hi); background:rgba(255,153,51,0.07); }
+#refresh-btn {
+  padding:5px 12px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px;
+  background:rgba(19,136,8,0.12); border:1px solid rgba(19,136,8,0.5); color:#55e055; cursor:pointer; transition:all .2s;
+  display:flex; align-items:center; gap:5px;
+}
+#refresh-btn:hover { background:rgba(19,136,8,0.25); }
+#refresh-btn.loading { animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+#credits-btn {
+  padding:5px 14px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px;
+  background:rgba(79,195,247,0.1); border:1px solid rgba(79,195,247,0.4); color:var(--a3); cursor:pointer; transition:all .2s;
+}
+#credits-btn:hover { background:rgba(79,195,247,0.2); border-color:var(--a3); }
+#next-refresh { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:1px; }
+
+/* ── LAYOUT ── */
+#main { display:grid; grid-template-columns:270px 1fr 290px; height:calc(100vh - 46px); overflow:hidden; }
+.panel { background:var(--panel); border-right:1px solid var(--border); overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; }
+.panel::-webkit-scrollbar { width:3px; }
+.panel::-webkit-scrollbar-thumb { background:var(--border-hi); }
+
+/* ── SECTION ── */
+.sec { border-bottom:1px solid var(--border); padding:10px 12px; }
+.sec-title { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:7px; }
+.sec-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── STAT GRID ── */
+.sg { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.sc { background:rgba(255,153,51,0.03); border:1px solid var(--border); padding:8px 9px; position:relative; overflow:hidden; cursor:default; transition:border-color .2s; }
+.sc:hover { border-color:var(--border-hi); }
+.sc::before { content:''; position:absolute; top:0; left:0; width:2px; height:100%; background:var(--accent); }
+.sc.g::before { background:var(--a2); } .sc.b::before { background:var(--a3); } .sc.r::before { background:var(--red); }
+.sl { font-size:9px; color:var(--dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
+.sv { font-family:'Orbitron',monospace; font-size:15px; font-weight:700; color:#fff; line-height:1; }
+.su { font-size:9px; color:var(--dim); }
+.sd { font-size:10px; margin-top:2px; }
+.up { color:#4caf50; } .dn { color:var(--red); }
+
+/* ── LOADING SKELETON ── */
+.skel { background:linear-gradient(90deg,rgba(255,153,51,0.04) 25%,rgba(255,153,51,0.1) 50%,rgba(255,153,51,0.04) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; height:12px; border-radius:2px; margin-bottom:4px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ── BAR ROWS ── */
+.br { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+.bl { font-size:10px; width:68px; flex-shrink:0; color:var(--text); }
+.bt { flex:1; height:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); position:relative; overflow:hidden; }
+.bf { height:100%; transition:width 1.2s ease; position:relative; }
+.bf::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08)); }
+.bv { font-family:'Share Tech Mono',monospace; font-size:9px; width:48px; text-align:right; flex-shrink:0; }
+
+/* ── MAP ── */
+#map-wrap { position:relative; background:#030710; overflow:hidden; display:flex; flex-direction:column; }
+#mhdr { padding:7px 14px; background:rgba(4,8,13,0.95); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; z-index:10; }
+.mt { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; color:var(--saffron); letter-spacing:2px; }
+#svg-map { flex:1; width:100%; overflow:visible; }
+#map-status { position:absolute; top:44px; left:50%; transform:translateX(-50%); background:rgba(4,8,13,0.92); border:1px solid var(--border-hi); padding:6px 16px; font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--accent); z-index:20; display:none; }
+
+/* ── MAP STATES ── */
+.st { fill:#0c1824; stroke:rgba(255,153,51,0.35); stroke-width:.7; cursor:pointer; transition:all .25s; }
+.st:hover { stroke:var(--saffron); stroke-width:1.4; filter:brightness(1.5); }
+.st.sel { stroke:var(--yellow); stroke-width:2; filter:brightness(1.8); }
+.st.t5 { fill:#1c350a; } .st.t4 { fill:#16290a; } .st.t3 { fill:#101e09; } .st.t2 { fill:#0c1808; } .st.t1 { fill:#0c1620; }
+
+/* pulse dots */
+.pdot { cursor:pointer; }
+.pring { animation:pr 2.2s ease-in-out infinite; }
+@keyframes pr { 0%,100%{r:4;opacity:1} 50%{r:10;opacity:.3} }
+
+/* ── TOOLTIP ── */
+#tt { position:absolute; pointer-events:none; background:rgba(4,8,13,0.97); border:1px solid var(--border-hi); padding:9px 12px; font-size:11px; z-index:150; min-width:175px; display:none; box-shadow:var(--glow); }
+.tth { font-family:'Orbitron',monospace; font-size:12px; color:var(--saffron); margin-bottom:7px; }
+.ttr { display:flex; justify-content:space-between; gap:14px; margin-bottom:2px; }
+.ttk { color:var(--dim); font-size:10px; } .ttv { color:#fff; font-weight:600; font-size:10px; font-family:'Share Tech Mono',monospace; }
+
+/* ── STATE POPUP ── */
+#spop { position:absolute; top:50px; left:50%; transform:translateX(-50%); background:rgba(4,8,13,0.98); border:1px solid var(--border-hi); padding:13px 16px; z-index:50; display:none; min-width:320px; box-shadow:0 0 32px rgba(255,153,51,0.18); max-width:380px; }
+.pc { position:absolute; top:7px; right:10px; cursor:pointer; color:var(--dim); font-size:15px; }
+.pt { font-family:'Orbitron',monospace; font-size:14px; color:var(--saffron); margin-bottom:10px; letter-spacing:2px; }
+.pg { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.ps { background:rgba(255,153,51,0.04); border:1px solid var(--border); padding:7px 9px; }
+.psl { font-size:9px; color:var(--dim); letter-spacing:1px; }
+.psv { font-family:'Share Tech Mono',monospace; font-size:13px; color:#fff; margin-top:2px; }
+
+/* ── LEGEND ── */
+#mleg { position:absolute; bottom:38px; left:50%; transform:translateX(-50%); background:rgba(4,8,13,0.92); border:1px solid var(--border); padding:5px 14px; display:flex; gap:14px; font-size:10px; font-family:'Share Tech Mono',monospace; z-index:15; }
+.li { display:flex; align-items:center; gap:5px; }
+.ld { width:8px; height:8px; border-radius:50%; }
+
+/* ── TICKER ── */
+#ticker { position:absolute; bottom:0; left:0; right:0; height:27px; background:rgba(4,8,13,0.97); border-top:1px solid var(--border); display:flex; align-items:center; z-index:20; overflow:hidden; }
+.tlbl { padding:0 10px; background:var(--saffron); color:#000; font-family:'Share Tech Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; height:100%; display:flex; align-items:center; flex-shrink:0; }
+#tk { white-space:nowrap; animation:tkscr 80s linear infinite; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text); padding-left:28px; }
+@keyframes tkscr { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── BOTTOM BAR ── */
+#bbar { position:absolute; left:270px; right:290px; bottom:27px; height:27px; background:rgba(4,8,13,0.95); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 10px; gap:14px; z-index:15; font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); }
+#coords { color:var(--a3); }
+
+/* ── AI PANEL ── */
+#ai-wrap { position:absolute; right:295px; bottom:58px; width:380px; background:rgba(4,8,13,0.98); border:1px solid var(--border-hi); box-shadow:var(--glow); z-index:80; display:none; flex-direction:column; max-height:430px; }
+.aih { padding:9px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:7px; background:rgba(255,153,51,0.05); }
+.ait { font-family:'Orbitron',monospace; font-size:11px; color:var(--saffron); letter-spacing:2px; flex:1; }
+#ai-msgs { flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:7px; max-height:290px; }
+#ai-msgs::-webkit-scrollbar { width:3px; }
+#ai-msgs::-webkit-scrollbar-thumb { background:var(--border-hi); }
+.amsg { padding:7px 10px; font-size:12px; line-height:1.55; max-width:92%; }
+.amsg.u { background:rgba(255,153,51,0.08); border:1px solid rgba(255,153,51,0.25); align-self:flex-end; color:#fff; }
+.amsg.b { background:rgba(19,136,8,0.08); border:1px solid rgba(19,136,8,0.25); align-self:flex-start; color:var(--text); }
+.amsg.ld { color:var(--dim); font-style:italic; }
+.air { padding:8px; border-top:1px solid var(--border); display:flex; gap:6px; }
+#ai-in { flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--border); color:#fff; padding:5px 9px; font-family:'Rajdhani',sans-serif; font-size:12px; outline:none; }
+#ai-in:focus { border-color:var(--border-hi); }
+.asend { padding:5px 12px; background:var(--accent); color:#000; border:none; cursor:pointer; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px; letter-spacing:1px; }
+.asend:hover { background:#ffb74d; }
+#ai-btn { position:absolute; right:295px; bottom:30px; padding:7px 14px; background:rgba(255,153,51,0.12); border:1px solid var(--border-hi); color:var(--accent); font-family:'Orbitron',monospace; font-size:10px; letter-spacing:1.5px; cursor:pointer; z-index:50; display:flex; align-items:center; gap:7px; box-shadow:var(--glow); transition:all .2s; }
+#ai-btn:hover { background:rgba(255,153,51,0.22); }
+
+/* ── ALERT ITEMS ── */
+.ai { padding:7px 12px; border-bottom:1px solid rgba(255,153,51,0.07); display:flex; gap:7px; align-items:flex-start; cursor:pointer; transition:background .2s; animation:sli .3s ease; }
+.ai:hover { background:rgba(255,153,51,0.04); }
+@keyframes sli { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+.ad { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.ad.h { background:var(--red); box-shadow:0 0 7px var(--red); }
+.ad.m { background:var(--yellow); box-shadow:0 0 7px var(--yellow); }
+.ad.l { background:var(--a2); box-shadow:0 0 7px var(--a2); }
+.at { font-size:11px; font-weight:600; color:#fff; margin-bottom:2px; }
+.am { font-size:9px; color:var(--dim); font-family:'Share Tech Mono',monospace; }
+
+/* ── PROJECT ITEMS ── */
+.pj { border-bottom:1px solid rgba(255,153,51,0.07); padding:7px 0; }
+.pjn { font-size:11px; font-weight:600; color:#fff; margin-bottom:2px; }
+.pjm { font-size:9px; color:var(--dim); margin-bottom:4px; }
+.pjb { display:flex; align-items:center; gap:7px; }
+.pjt { flex:1; height:5px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); }
+.pjf { height:100%; }
+.pjp { font-family:'Share Tech Mono',monospace; font-size:9px; width:28px; text-align:right; }
+.pjs { font-size:8px; border:1px solid; padding:1px 4px; letter-spacing:.5px; }
+
+/* ── CREDITS OVERLAY ── */
+#cred-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:1000; display:none; align-items:center; justify-content:center; }
+#cred-card {
+  background:linear-gradient(135deg,#070d14 0%,#0a1828 50%,#070d14 100%);
+  border:1px solid var(--border-hi); box-shadow:0 0 60px rgba(255,153,51,0.22), inset 0 0 60px rgba(255,153,51,0.03);
+  padding:0; width:520px; max-width:92vw; position:relative; overflow:hidden;
+}
+#cred-card::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='.5' fill='rgba(255,153,51,0.12)'/%3E%3C/svg%3E"); pointer-events:none; }
+.cb-top { padding:28px 28px 0; display:flex; align-items:flex-start; gap:18px; }
+.cb-avatar {
+  width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--saffron),var(--a2));
+  display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:22px; font-weight:900; color:#000; flex-shrink:0;
+  box-shadow:0 0 24px rgba(255,153,51,0.5);
+}
+.cb-info { flex:1; }
+.cb-name { font-family:'Orbitron',monospace; font-size:20px; font-weight:900; color:#fff; letter-spacing:2px; line-height:1.2; margin-bottom:8px; }
+.cb-handle { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--a3); letter-spacing:1px; margin-bottom:4px; }
+.cb-links { display:flex; gap:10px; margin-top:8px; }
+.cb-link { padding:4px 12px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; border-radius:1px; cursor:pointer; text-decoration:none; display:inline-block; transition:all .2s; }
+.cb-link.ig { background:rgba(225,48,108,0.12); border:1px solid rgba(225,48,108,0.4); color:#e1306c; }
+.cb-link.ig:hover { background:rgba(225,48,108,0.25); }
+.cb-link.web { background:rgba(79,195,247,0.12); border:1px solid rgba(79,195,247,0.4); color:var(--a3); }
+.cb-link.web:hover { background:rgba(79,195,247,0.25); }
+.cb-divider { height:1px; background:linear-gradient(90deg,transparent,var(--border-hi),transparent); margin:20px 0; }
+.cb-why { padding:0 28px; }
+.cb-why-title { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:2px; margin-bottom:12px; }
+.cb-reasons { display:flex; flex-direction:column; gap:8px; }
+.cb-reason { display:flex; gap:10px; align-items:flex-start; }
+.cb-num { font-family:'Orbitron',monospace; font-size:11px; color:var(--saffron); font-weight:700; flex-shrink:0; width:20px; }
+.cb-txt { font-size:13px; color:var(--text); line-height:1.5; }
+.cb-bottom { padding:20px 28px 24px; display:flex; justify-content:space-between; align-items:center; }
+.cb-tag { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:2px; }
+.cb-close { padding:6px 18px; background:rgba(255,153,51,0.12); border:1px solid var(--border-hi); color:var(--accent); font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; cursor:pointer; transition:all .2s; }
+.cb-close:hover { background:rgba(255,153,51,0.25); }
+.cb-bento-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 28px; margin-bottom:4px; }
+.cb-bento { background:rgba(255,153,51,0.04); border:1px solid var(--border); padding:10px 12px; }
+.cb-bl { font-size:9px; color:var(--dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+.cb-bv { font-family:'Share Tech Mono',monospace; font-size:13px; color:#fff; }
+
+/* ── GRID LINE OVERLAY ── */
+.gline { stroke:rgba(255,153,51,0.04); stroke-width:.5; }
+
+/* ── COMPASS ── */
+.compass { pointer-events:none; }
+
+/* ── Scrollfeed ── */
+#feed-wrap { overflow-y:auto; flex:1; }
+#feed-wrap::-webkit-scrollbar { width:3px; }
+#feed-wrap::-webkit-scrollbar-thumb { background:var(--border-hi); }
+
+/* ── RIGHT ── */
+#right-panel { border-left:1px solid var(--border); border-right:none; display:flex; flex-direction:column; overflow:hidden; }
+#right-inner { overflow-y:auto; flex:1; }
+#right-inner::-webkit-scrollbar { width:3px; }
+#right-inner::-webkit-scrollbar-thumb { background:var(--border-hi); }
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<div id="topbar">
+  <div class="logo">BHARAT <em>MONITOR</em></div>
+  <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim)">v1.0</span>
+  <div class="vsep"></div>
+  <div id="clock">--:--:-- IST</div>
+  <div class="vsep"></div>
+  <div class="pill live"><div class="blink"></div>LIVE</div>
+  <div class="pill warn" id="alert-count-pill"><div class="blink"></div>LOADING</div>
+  <div class="vsep"></div>
+  <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim)">FY 2025–26</span>
+  <div class="spacer"></div>
+  <div id="next-refresh">NEXT REFRESH: --:--</div>
+  <button id="refresh-btn" onclick="refreshAll()">⟳ REFRESH NOW</button>
+  <div class="vsep"></div>
+  <button class="nav-tab active" onclick="switchTab('fiscal',this)">FISCAL</button>
+  <button class="nav-tab" onclick="switchTab('projects',this)">PROJECTS</button>
+  <button class="nav-tab" onclick="switchTab('peace',this)">PEACE</button>
+  <button class="nav-tab" onclick="switchTab('defence',this)">DEFENCE</button>
+  <div class="vsep"></div>
+  <button id="credits-btn" onclick="showCredits()">⬡ BUILDER</button>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div id="main">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="panel" id="left-panel">
+    <div class="sec" id="sec-overview">
+      <div class="sec-title">NATIONAL OVERVIEW</div>
+      <div class="sg" id="overview-grid">
+        <div class="sc"><div class="sl">GDP</div><div class="skel" style="width:70%"></div></div>
+        <div class="sc g"><div class="sl">TAX</div><div class="skel" style="width:60%"></div></div>
+        <div class="sc b"><div class="sl">EXPENDITURE</div><div class="skel" style="width:80%"></div></div>
+        <div class="sc r"><div class="sl">DEFICIT</div><div class="skel" style="width:50%"></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">MAP LAYERS</div>
+      <div id="layer-list">
+        <div class="br" style="margin-bottom:5px;cursor:pointer" onclick="toggleLayer('tax',this)">
+          <div style="width:12px;height:12px;background:rgba(255,153,51,0.8);border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;flex-shrink:0" class="lchk">✓</div>
+          <span style="font-size:11px;font-weight:600">💰 TAX ZONES</span>
+        </div>
+        <div class="br" style="margin-bottom:5px;cursor:pointer" onclick="toggleLayer('projects',this)">
+          <div style="width:12px;height:12px;background:rgba(255,215,0,0.8);border:1px solid #ffd700;display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;flex-shrink:0" class="lchk">✓</div>
+          <span style="font-size:11px;font-weight:600">🏗 MEGA PROJECTS</span>
+        </div>
+        <div class="br" style="margin-bottom:5px;cursor:pointer" onclick="toggleLayer('alerts',this)">
+          <div style="width:12px;height:12px;background:rgba(255,61,61,0.8);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;flex-shrink:0" class="lchk">✓</div>
+          <span style="font-size:11px;font-weight:600">⚠ ALERT ZONES</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: FISCAL -->
+    <div class="sec tab-l active" id="tl-fiscal">
+      <div class="sec-title">STATE TAX LEADERS</div>
+      <div id="state-tax-bars"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+    </div>
+
+    <!-- TAB: PROJECTS -->
+    <div class="sec tab-l" id="tl-projects" style="display:none">
+      <div class="sec-title">PROJECT SECTORS</div>
+      <div id="proj-sector-bars"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+    </div>
+
+    <!-- TAB: PEACE -->
+    <div class="sec tab-l" id="tl-peace" style="display:none">
+      <div class="sec-title">PEACE RANKING</div>
+      <div id="peace-bars-left"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+    </div>
+
+    <!-- TAB: DEFENCE -->
+    <div class="sec tab-l" id="tl-defence" style="display:none">
+      <div class="sec-title">COMMAND READINESS</div>
+      <div id="defence-bars-left"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">SCHEME PROGRESS</div>
+      <div id="scheme-bars"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+    </div>
+  </div>
+
+  <!-- ── CENTER MAP ── -->
+  <div id="map-wrap">
+    <div id="mhdr">
+      <div class="mt">INDIA — SITUATIONAL AWARENESS</div>
+      <div style="flex:1"></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim)" id="hover-info">HOVER OVER STATE</div>
+    </div>
+
+    <!-- INDIA SVG MAP -->
+    <svg id="svg-map" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(255,153,51,0.04)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="400" cy="460" rx="360" ry="400" fill="url(#bgGlow)"/>
+      <!-- Grid -->
+      <line x1="0" y1="200" x2="800" y2="200" class="gline"/><line x1="0" y1="400" x2="800" y2="400" class="gline"/>
+      <line x1="0" y1="600" x2="800" y2="600" class="gline"/><line x1="0" y1="800" x2="800" y2="800" class="gline"/>
+      <line x1="200" y1="0" x2="200" y2="900" class="gline"/><line x1="400" y1="0" x2="400" y2="900" class="gline"/>
+      <line x1="600" y1="0" x2="600" y2="900" class="gline"/>
+
+      <!-- ─ STATE PATHS ─ -->
+      <path id="st-JK"  class="st" data-state="Jammu & Kashmir"   d="M280,32 L345,20 L402,42 L432,82 L420,132 L380,152 L342,142 L298,122 L268,90 Z"/>
+      <path id="st-HP"  class="st" data-state="Himachal Pradesh"  d="M342,142 L382,152 L402,172 L376,198 L345,192 L320,176 Z"/>
+      <path id="st-PB"  class="st" data-state="Punjab"            d="M268,150 L320,145 L342,162 L322,188 L284,192 L258,175 Z"/>
+      <path id="st-HR"  class="st" data-state="Haryana"           d="M288,192 L325,186 L346,202 L336,232 L294,237 L268,217 Z"/>
+      <path id="st-DL"  class="st" data-state="Delhi"             d="M320,212 L342,206 L356,222 L351,243 L326,247 L311,231 Z"/>
+      <path id="st-UK"  class="st" data-state="Uttarakhand"       d="M352,165 L402,172 L432,192 L412,227 L376,232 L347,216 Z"/>
+      <path id="st-UP"  class="st" data-state="Uttar Pradesh"     d="M294,242 L352,236 L428,232 L492,252 L502,302 L482,352 L422,372 L352,362 L294,332 L268,292 Z"/>
+      <path id="st-RJ"  class="st" data-state="Rajasthan"         d="M198,202 L268,196 L294,242 L268,302 L238,362 L183,382 L143,342 L138,282 L158,222 Z"/>
+      <path id="st-MP"  class="st" data-state="Madhya Pradesh"    d="M243,362 L294,336 L422,366 L462,382 L452,432 L392,452 L298,447 L233,422 Z"/>
+      <path id="st-GJ"  class="st" data-state="Gujarat"           d="M128,332 L188,312 L242,342 L233,422 L198,472 L153,482 L98,452 L83,392 Z"/>
+      <path id="st-MH"  class="st" data-state="Maharashtra"       d="M198,452 L298,447 L397,452 L422,492 L402,552 L352,582 L278,572 L208,542 L168,492 Z"/>
+      <path id="st-BR"  class="st" data-state="Bihar"             d="M482,302 L542,292 L572,322 L557,362 L502,377 L462,357 Z"/>
+      <path id="st-JH"  class="st" data-state="Jharkhand"         d="M492,367 L552,357 L582,387 L567,432 L512,442 L472,417 Z"/>
+      <path id="st-WB"  class="st" data-state="West Bengal"       d="M562,282 L617,267 L642,302 L637,362 L602,412 L562,422 L537,382 Z"/>
+      <path id="st-OD"  class="st" data-state="Odisha"            d="M512,427 L567,417 L602,442 L592,512 L547,537 L492,512 Z"/>
+      <path id="st-CG"  class="st" data-state="Chhattisgarh"      d="M402,452 L482,447 L512,472 L502,542 L452,562 L388,542 Z"/>
+      <path id="st-TG"  class="st" data-state="Telangana"         d="M382,542 L452,537 L492,562 L482,617 L432,637 L372,612 Z"/>
+      <path id="st-AP"  class="st" data-state="Andhra Pradesh"    d="M432,612 L492,592 L542,622 L532,682 L482,712 L422,697 Z"/>
+      <path id="st-KA"  class="st" data-state="Karnataka"         d="M293,557 L382,547 L422,572 L432,637 L397,682 L342,692 L283,662 Z"/>
+      <path id="st-GA"  class="st" data-state="Goa"               d="M248,587 L278,580 L287,602 L267,617 Z"/>
+      <path id="st-KL"  class="st" data-state="Kerala"            d="M293,662 L342,652 L352,712 L327,772 L292,782 Z"/>
+      <path id="st-TN"  class="st" data-state="Tamil Nadu"        d="M367,672 L432,660 L462,702 L442,762 L397,792 L347,777 Z"/>
+      <path id="st-AS"  class="st" data-state="Assam"             d="M642,252 L702,242 L732,262 L722,297 L672,307 Z"/>
+      <path id="st-NE"  class="st" data-state="Northeast States"  d="M698,242 L748,232 L772,257 L762,297 L722,297 Z"/>
+
+      <!-- ─ CITY DOTS ─ -->
+      <g id="city-layer">
+        <g class="pdot" onclick="onCityClick('Delhi')">
+          <circle class="pring" cx="336" cy="224" r="4" fill="none" stroke="#FF9933" stroke-width="1.5"/>
+          <circle cx="336" cy="224" r="2.5" fill="#FF9933"/>
+          <text x="343" y="222" fill="#FF9933" font-size="8" font-family="'Share Tech Mono',monospace">NEW DELHI</text>
+        </g>
+        <g class="pdot" onclick="onCityClick('Maharashtra')">
+          <circle class="pring" cx="208" cy="502" r="4" fill="none" stroke="#ff4444" stroke-width="1.5"/>
+          <circle cx="208" cy="502" r="2.5" fill="#ff4444"/>
+          <text x="216" y="500" fill="#ff8888" font-size="8" font-family="'Share Tech Mono',monospace">MUMBAI</text>
+        </g>
+        <g class="pdot" onclick="onCityClick('Karnataka')">
+          <circle class="pring" cx="328" cy="627" r="4" fill="none" stroke="#4fc3f7" stroke-width="1.5"/>
+          <circle cx="328" cy="627" r="2.5" fill="#4fc3f7"/>
+          <text x="336" y="625" fill="#4fc3f7" font-size="8" font-family="'Share Tech Mono',monospace">BENGALURU</text>
+        </g>
+        <g class="pdot" onclick="onCityClick('Tamil Nadu')">
+          <circle class="pring" cx="412" cy="692" r="4" fill="none" stroke="#4fc3f7" stroke-width="1.5"/>
+          <circle cx="412" cy="692" r="2.5" fill="#4fc3f7"/>
+          <text x="420" y="690" fill="#4fc3f7" font-size="8" font-family="'Share Tech Mono',monospace">CHENNAI</text>
+        </g>
+        <g class="pdot" onclick="onCityClick('West Bengal')">
+          <circle class="pring" cx="597" cy="342" r="4" fill="none" stroke="#ffd700" stroke-width="1.5"/>
+          <circle cx="597" cy="342" r="2.5" fill="#ffd700"/>
+          <text x="604" y="340" fill="#ffd700" font-size="8" font-family="'Share Tech Mono',monospace">KOLKATA</text>
+        </g>
+      </g>
+
+      <!-- ─ ALERT PULSE ZONES ─ -->
+      <g id="alert-layer">
+        <circle cx="492" cy="482" r="14" fill="rgba(255,61,61,0.1)" stroke="#ff4444" stroke-width="1" stroke-dasharray="3,3">
+          <animate attributeName="r" values="10;18;10" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="240" cy="142" r="10" fill="rgba(255,153,51,0.1)" stroke="#FF9933" stroke-width="1" stroke-dasharray="3,3">
+          <animate attributeName="r" values="7;14;7" dur="2.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="722" cy="268" r="10" fill="rgba(255,153,51,0.1)" stroke="#FF9933" stroke-width="1" stroke-dasharray="3,3">
+          <animate attributeName="r" values="7;13;7" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- ─ PROJECT MARKERS ─ -->
+      <g id="project-layer">
+        <rect x="168" y="464" width="7" height="7" fill="#ffd700" opacity=".85"/>
+        <rect x="330" y="214" width="6" height="6" fill="#4fc3f7" opacity=".85"/>
+        <rect x="322" y="619" width="6" height="6" fill="#4caf50" opacity=".85"/>
+        <rect x="158" y="422" width="6" height="6" fill="#ffd700" opacity=".85"/>
+      </g>
+
+      <!-- ─ COMPASS ─ -->
+      <g transform="translate(748,78)" class="compass">
+        <circle r="22" fill="rgba(4,8,13,0.85)" stroke="rgba(255,153,51,0.28)" stroke-width="1"/>
+        <text y="-10" fill="#FF9933" font-size="9" text-anchor="middle" font-family="'Share Tech Mono',monospace">N</text>
+        <polygon points="0,-16 3.5,0 0,5 -3.5,0" fill="#FF9933" opacity=".9"/>
+        <polygon points="0,16 3.5,0 0,-5 -3.5,0" fill="#333" opacity=".7"/>
+      </g>
+
+      <!-- Scale -->
+      <g transform="translate(48,862)">
+        <line x1="0" y1="0" x2="76" y2="0" stroke="rgba(255,153,51,0.45)" stroke-width="1.5"/>
+        <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(255,153,51,0.45)" stroke-width="1.5"/>
+        <line x1="76" y1="-4" x2="76" y2="4" stroke="rgba(255,153,51,0.45)" stroke-width="1.5"/>
+        <text x="38" y="-7" fill="rgba(255,153,51,0.5)" font-size="7" text-anchor="middle" font-family="'Share Tech Mono',monospace">500 KM</text>
+      </g>
+    </svg>
+
+    <!-- Tooltip -->
+    <div id="tt"></div>
+
+    <!-- State popup -->
+    <div id="spop">
+      <div class="pc" onclick="closePopup()">✕</div>
+      <div class="pt" id="spop-name"></div>
+      <div class="pg" id="spop-grid"></div>
+    </div>
+
+    <!-- Map status banner -->
+    <div id="map-status">⟳ FETCHING LIVE DATA...</div>
+
+    <!-- Legend -->
+    <div id="mleg">
+      <span style="color:var(--dim);font-size:9px;margin-right:3px">LEGEND</span>
+      <div class="li"><div class="ld" style="background:var(--red)"></div>HIGH ALERT</div>
+      <div class="li"><div class="ld" style="background:var(--saffron)"></div>ELEVATED</div>
+      <div class="li"><div class="ld" style="background:var(--yellow);border-radius:0"></div>MEGA PROJECT</div>
+      <div class="li"><div class="ld" style="background:var(--a3)"></div>TECH HUB</div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div id="bbar">
+      <span id="coords" class="">28.61°N 77.21°E</span>
+      <span>|</span>
+      <span id="sel-state">NO STATE SELECTED</span>
+      <span style="flex:1"></span>
+      <span id="data-age" style="color:var(--dim)">DATA: LOADING</span>
+    </div>
+
+    <!-- Ticker -->
+    <div id="ticker">
+      <div class="tlbl">LIVE</div>
+      <div id="tk">LOADING LIVE DATA FROM AI...</div>
+    </div>
+
+    <!-- AI Button -->
+    <button id="ai-btn" onclick="toggleAI()">🤖 BHARAT AI ANALYST</button>
+
+    <!-- AI Panel -->
+    <div id="ai-wrap">
+      <div class="aih">
+        <span>🤖</span>
+        <div class="ait">BHARAT AI ANALYST</div>
+        <span onclick="toggleAI()" style="cursor:pointer;color:var(--dim);font-size:13px">✕</span>
+      </div>
+      <div id="ai-msgs">
+        <div class="amsg b">Namaste! I am your Bharat Intelligence Analyst powered by live AI. Ask me about India's budget, state taxes, mega projects, defence, or current affairs.</div>
+      </div>
+      <div class="air">
+        <input id="ai-in" placeholder="Ask about India's governance..." onkeydown="if(event.key==='Enter')sendAI()"/>
+        <button class="asend" onclick="sendAI()">SEND</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div id="right-panel">
+    <div class="sec">
+      <div class="sec-title">INTELLIGENCE FEED</div>
+    </div>
+    <div id="feed-wrap">
+      <div class="ai"><div class="ad m"></div><div><div class="at">Loading live intelligence...</div><div class="am">FETCHING FROM AI</div></div></div>
+    </div>
+
+    <div id="right-inner">
+      <!-- TAB: FISCAL -->
+      <div class="tab-r active" id="tr-fiscal">
+        <div class="sec">
+          <div class="sec-title">EXPENDITURE SECTORS</div>
+          <div id="exp-bars"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+        </div>
+        <div class="sec">
+          <div class="sec-title">GST MONTHLY TREND</div>
+          <canvas id="gst-canvas" height="72" style="width:100%"></canvas>
+        </div>
+      </div>
+
+      <!-- TAB: PROJECTS -->
+      <div class="tab-r" id="tr-projects" style="display:none">
+        <div class="sec">
+          <div class="sec-title">ACTIVE MEGA PROJECTS</div>
+          <div id="proj-list"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+        </div>
+      </div>
+
+      <!-- TAB: PEACE -->
+      <div class="tab-r" id="tr-peace" style="display:none">
+        <div class="sec">
+          <div class="sec-title">PEACE METRICS</div>
+          <div id="peace-metrics"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+        </div>
+      </div>
+
+      <!-- TAB: DEFENCE -->
+      <div class="tab-r" id="tr-defence" style="display:none">
+        <div class="sec">
+          <div class="sec-title">DEFENCE OVERVIEW</div>
+          <div id="def-metrics"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CREDITS OVERLAY ══ -->
+<div id="cred-overlay" onclick="if(event.target===this)hideCredits()">
+  <div id="cred-card">
+    <div class="cb-top">
+      <div class="cb-avatar">N</div>
+      <div class="cb-info">
+        <div class="cb-name">NIKSHEP<br>DOGGALLI</div>
+        <div class="cb-handle">// BUILDER & ARCHITECT</div>
+        <div class="cb-links">
+          <a class="cb-link ig" href="https://instagram.com/nikkk.exe" target="_blank">📸 @nikkk.exe</a>
+          <a class="cb-link web" href="https://nikshep.vercel.app" target="_blank">🌐 nikshep.vercel.app</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="cb-divider"></div>
+
+    <div class="cb-bento-row">
+      <div class="cb-bento">
+        <div class="cb-bl">INSTAGRAM</div>
+        <div class="cb-bv" style="color:#e1306c">instagram.com/nikkk.exe</div>
+      </div>
+      <div class="cb-bento">
+        <div class="cb-bl">PORTFOLIO</div>
+        <div class="cb-bv" style="color:var(--a3)">nikshep.vercel.app</div>
+      </div>
+    </div>
+
+    <div class="cb-why" style="margin-top:14px">
+      <div class="cb-why-title">// WHY I BUILT BHARAT MONITOR</div>
+      <div class="cb-reasons">
+        <div class="cb-reason">
+          <div class="cb-num">01</div>
+          <div class="cb-txt">India's governance data is scattered across 50+ portals — I wanted a single DEFCON-style interface that unifies fiscal, defence, peace, and project intelligence in real time.</div>
+        </div>
+        <div class="cb-reason">
+          <div class="cb-num">02</div>
+          <div class="cb-txt">Most dashboards show stale numbers; I built this with a live AI backbone so every metric you see is freshly reasoned from the latest available data, not hardcoded six months ago.</div>
+        </div>
+        <div class="cb-reason">
+          <div class="cb-num">03</div>
+          <div class="cb-txt">As an Indian builder, I believe citizens deserve a military-grade situational awareness layer for their own country — transparent, open, and beautiful.</div>
+        </div>
+        <div class="cb-reason">
+          <div class="cb-num">04</div>
+          <div class="cb-txt">Inspired by worldmonitor.app, I wanted to prove the same intelligence-dashboard concept could be built specifically for India's complex federal structure and 28-state economy.</div>
+        </div>
+        <div class="cb-reason">
+          <div class="cb-num">05</div>
+          <div class="cb-txt">This is open civic tech — a statement that powerful geopolitical tools shouldn't be locked behind enterprise paywalls. Bharat Monitor is free, forever.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cb-bottom">
+      <div class="cb-tag">BHARAT MONITOR v1.0 • OPEN CIVIC TECH</div>
+      <button class="cb-close" onclick="hideCredits()">CLOSE ✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════════
+const OR_KEY = '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';
+const OR_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const MODEL  = 'anthropic/claude-sonnet-4-5';
+const REFRESH_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+
+let nextRefreshTime = null;
+let refreshTimer    = null;
+let currentTab      = 'fiscal';
+let liveData        = {};
+
+// ══════════════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════════════
+function tick() {
+  const now = new Date();
+  const ist = new Date(now.getTime() + 5.5 * 3600000);
+  const p = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    `${p(ist.getUTCHours())}:${p(ist.getUTCMinutes())}:${p(ist.getUTCSeconds())} IST`;
+
+  if (nextRefreshTime) {
+    const diff = Math.max(0, nextRefreshTime - Date.now());
+    const m = p(Math.floor(diff/60000));
+    const s = p(Math.floor((diff%60000)/1000));
+    document.getElementById('next-refresh').textContent = `NEXT REFRESH: ${m}:${s}`;
+  }
+}
+setInterval(tick, 1000); tick();
+
+// ══════════════════════════════════════════════
+//  API HELPER — with web search
+// ══════════════════════════════════════════════
+async function callAI(systemPrompt, userPrompt, useWebSearch = true, maxTokens = 1200) {
+  const body = {
+    model: MODEL,
+    max_tokens: maxTokens,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: userPrompt }
+    ]
+  };
+  if (useWebSearch) {
+    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  }
+  const res = await fetch(OR_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OR_KEY}`,
+      'HTTP-Referer': 'https://bharat-monitor.in',
+      'X-Title': 'Bharat Monitor'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  const data = await res.json();
+  // Collect all text blocks
+  const text = (data.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n');
+  return text;
+}
+
+// ══════════════════════════════════════════════
+//  JSON PARSE HELPER
+// ══════════════════════════════════════════════
+function safeJSON(text) {
+  try {
+    const clean = text.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
+    const start = clean.indexOf('{'); const end = clean.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('no JSON');
+    return JSON.parse(clean.slice(start, end+1));
+  } catch(e) {
+    console.warn('JSON parse fail:', e, text.slice(0,200));
+    return null;
+  }
+}
+function safeJSONArray(text) {
+  try {
+    const clean = text.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
+    const start = clean.indexOf('['); const end = clean.lastIndexOf(']');
+    if (start === -1 || end === -1) throw new Error('no array');
+    return JSON.parse(clean.slice(start, end+1));
+  } catch(e) {
+    console.warn('JSON array parse fail:', e);
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  DATA FETCHERS — all real-time via AI
+// ══════════════════════════════════════════════
+
+async function fetchOverview() {
+  showBanner('FETCHING NATIONAL OVERVIEW...');
+  const sys = `You are a precise Indian fiscal data analyst. Return ONLY valid JSON, no prose, no markdown fences.`;
+  const usr = `Search the web for India's LATEST fiscal data for FY2025-26. Return this exact JSON structure with real current numbers:
+{
+  "gdp": "value with unit e.g. $3.9T",
+  "gdp_growth": "e.g. 6.8%",
+  "gdp_delta": "up or down",
+  "tax_collected": "e.g. ₹34L Cr",
+  "tax_growth": "e.g. 12%",
+  "expenditure": "e.g. ₹47.6L Cr",
+  "fiscal_deficit": "e.g. 5.1%",
+  "deficit_note": "e.g. of GDP",
+  "forex_reserves": "e.g. $623B",
+  "inflation": "e.g. 4.2%",
+  "unemployment": "e.g. 7.8%",
+  "gst_latest_month": "e.g. ₹1.96L Cr"
+}`;
+  const txt = await callAI(sys, usr, true, 600);
+  const d = safeJSON(txt);
+  if (d) {
+    liveData.overview = d;
+    renderOverview(d);
+  }
+}
+
+async function fetchStateTax() {
+  showBanner('FETCHING STATE TAX DATA...');
+  const sys = `You are an Indian fiscal analyst. Return ONLY valid JSON array.`;
+  const usr = `Search for the latest state-wise GST/tax contribution data for India FY2025-26. Return a JSON array of top 8 states:
+[{"state":"Maharashtra","tax":"₹16.8L Cr","pct":85},{"state":"Karnataka","tax":"₹8.6L Cr","pct":43},...]
+Use real current data. pct is percentage of top state (0-100).`;
+  const txt = await callAI(sys, usr, true, 600);
+  const arr = safeJSONArray(txt);
+  if (arr) {
+    liveData.stateTax = arr;
+    renderStateTaxBars(arr);
+    colorMapByTax(arr);
+  }
+}
+
+async function fetchStateDetail(stateName) {
+  showBanner(`FETCHING ${stateName.toUpperCase()} DATA...`);
+  const sys = `You are an Indian state governance analyst. Return ONLY valid JSON.`;
+  const usr = `Search for latest data for Indian state: ${stateName}. Return JSON:
+{
+  "state": "${stateName}",
+  "capital": "city name",
+  "population": "e.g. 12.4 Cr",
+  "gdp_contribution": "e.g. 15.4%",
+  "tax_revenue": "e.g. ₹16.8L Cr",
+  "expenditure": "e.g. ₹11.2L Cr",
+  "peace_index": 60,
+  "active_projects": 28,
+  "literacy": "e.g. 77.2%",
+  "cm": "Chief Minister name"
+}`;
+  const txt = await callAI(sys, usr, true, 500);
+  const d = safeJSON(txt);
+  if (d) showStatePopup(d);
+  hideBanner();
+}
+
+async function fetchProjects() {
+  showBanner('FETCHING MEGA PROJECTS...');
+  const sys = `You are an Indian infrastructure analyst. Return ONLY valid JSON array.`;
+  const usr = `Search for India's current major infrastructure mega projects in 2025-2026. Return a JSON array of 6 projects:
+[{"name":"Project Name","state":"Location","budget":"₹X Cr","progress":45,"status":"ACTIVE or ON TRACK or DELAYED or PLANNING","sector":"RAIL or ROAD or ENERGY or DIGITAL"}]
+Use real current project data from news.`;
+  const txt = await callAI(sys, usr, true, 700);
+  const arr = safeJSONArray(txt);
+  if (arr) {
+    liveData.projects = arr;
+    renderProjectList(arr);
+    renderProjectSectorBars(arr);
+  }
+}
+
+async function fetchAlerts() {
+  showBanner('FETCHING INTELLIGENCE ALERTS...');
+  const sys = `You are an Indian intelligence analyst. Return ONLY valid JSON array.`;
+  const usr = `Search for latest significant news and events happening in India right now (March 2026). Return a JSON array of 7 alerts:
+[{"level":"high or med or low","title":"short title","location":"State/Region","time":"X min ago or X hrs ago","category":"SECURITY or ECONOMY or DISASTER or POLITICS or ACHIEVEMENT"}]
+Mix different categories. Use real current news.`;
+  const txt = await callAI(sys, usr, true, 700);
+  const arr = safeJSONArray(txt);
+  if (arr) {
+    liveData.alerts = arr;
+    renderAlertFeed(arr);
+    updateAlertCount(arr);
+  }
+}
+
+async function fetchPeaceIndex() {
+  showBanner('FETCHING PEACE INDEX...');
+  const sys = `You are a peace and security analyst for India. Return ONLY valid JSON.`;
+  const usr = `Search for India's latest peace index, internal security situation, and conflict statistics 2025-2026. Return JSON:
+{
+  "national_index": 58,
+  "rank_global": "135 of 163",
+  "incidents_ytd": 247,
+  "conflict_zones": 3,
+  "crime_trend": "-4.2%",
+  "peacekeepers": "8,420",
+  "states": [
+    {"state":"State Name","index":76,"status":"STABLE or ELEVATED or CRITICAL"}
+  ]
+}
+Include top 6 states by peace ranking.`;
+  const txt = await callAI(sys, usr, true, 700);
+  const d = safeJSON(txt);
+  if (d) {
+    liveData.peace = d;
+    renderPeaceMetrics(d);
+    renderPeaceBarsLeft(d.states);
+  }
+}
+
+async function fetchDefence() {
+  showBanner('FETCHING DEFENCE DATA...');
+  const sys = `You are an Indian defence analyst. Return ONLY valid JSON.`;
+  const usr = `Search for India's latest defence budget, military strength, and readiness data 2025-2026. Return JSON:
+{
+  "budget": "₹6.22L Cr",
+  "budget_gdp_pct": "2.2%",
+  "active_personnel": "14.55 Lakh",
+  "exports": "₹21,083 Cr",
+  "readiness": "DEFCON 4",
+  "rank_global": 4,
+  "commands": [
+    {"name":"Northern Command","readiness":85,"status":"HIGH"},
+    {"name":"Western Command","readiness":72,"status":"ELEVATED"},
+    {"name":"Eastern Command","readiness":68,"status":"ELEVATED"},
+    {"name":"Southern Command","readiness":55,"status":"NORMAL"},
+    {"name":"Central Command","readiness":60,"status":"NORMAL"}
+  ]
+}`;
+  const txt = await callAI(sys, usr, true, 600);
+  const d = safeJSON(txt);
+  if (d) {
+    liveData.defence = d;
+    renderDefenceMetrics(d);
+    renderDefenceBarsLeft(d.commands);
+  }
+}
+
+async function fetchExpenditure() {
+  showBanner('FETCHING EXPENDITURE DATA...');
+  const sys = `You are an Indian budget analyst. Return ONLY valid JSON array.`;
+  const usr = `Search for India's Union Budget 2025-26 expenditure allocation by sector. Return a JSON array:
+[{"sector":"INFRASTRUCTURE","pct":22,"color":"#FF9933"},{"sector":"EDUCATION","pct":14,"color":"#4fc3f7"},...]
+Include 6-7 sectors with real percentages adding to ~100. Assign distinct colors.`;
+  const txt = await callAI(sys, usr, true, 500);
+  const arr = safeJSONArray(txt);
+  if (arr) {
+    liveData.expenditure = arr;
+    renderExpBars(arr);
+    drawGSTChart();
+  }
+}
+
+async function fetchSchemes() {
+  showBanner('FETCHING SCHEME DATA...');
+  const sys = `You are an Indian government scheme analyst. Return ONLY valid JSON array.`;
+  const usr = `Search for the latest implementation progress of major Indian government schemes in 2025-2026. Return a JSON array of 5 schemes:
+[{"name":"PM AWAS YOJANA","pct":68,"color":"#FF9933"}]
+Use real current progress percentages from news/official data.`;
+  const txt = await callAI(sys, usr, true, 500);
+  const arr = safeJSONArray(txt);
+  if (arr) {
+    liveData.schemes = arr;
+    renderSchemeBars(arr);
+  }
+}
+
+async function fetchTicker() {
+  const sys = `You are a news ticker writer. Return ONLY a single line of text.`;
+  const usr = `Search for 8 significant recent India news headlines from March 2026. Format them as a single ticker string separated by "   |||   ". Each item should be: TOPIC: SHORT HEADLINE. Example: "GDP: INDIA ECONOMY GROWS 6.8% IN Q3   |||   GST: FEBRUARY COLLECTION HITS ₹1.96L CR"`;
+  const txt = await callAI(sys, usr, true, 400);
+  const clean = txt.replace(/```/g,'').trim();
+  if (clean.length > 20) {
+    const doubled = clean + '   |||   ' + clean;
+    document.getElementById('tk').textContent = doubled;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  RENDERERS
+// ══════════════════════════════════════════════
+
+function renderOverview(d) {
+  const el = document.getElementById('overview-grid');
+  el.innerHTML = `
+    <div class="sc">
+      <div class="sl">GDP</div>
+      <div class="sv">${d.gdp||'--'}</div>
+      <div class="sd ${d.gdp_delta==='up'?'up':'dn'}">${d.gdp_delta==='up'?'▲':'▼'} ${d.gdp_growth||'--'} YoY</div>
+    </div>
+    <div class="sc g">
+      <div class="sl">TAX COLLECTED</div>
+      <div class="sv">${d.tax_collected||'--'}</div>
+      <div class="sd up">▲ ${d.tax_growth||'--'}</div>
+    </div>
+    <div class="sc b">
+      <div class="sl">EXPENDITURE</div>
+      <div class="sv">${d.expenditure||'--'}</div>
+    </div>
+    <div class="sc r">
+      <div class="sl">FISCAL DEFICIT</div>
+      <div class="sv">${d.fiscal_deficit||'--'}</div>
+      <div class="sd dn">${d.deficit_note||'of GDP'}</div>
+    </div>
+    <div class="sc b" style="grid-column:span 2">
+      <div class="sl">FOREX RESERVES</div>
+      <div class="sv" style="font-size:13px">${d.forex_reserves||'--'} &nbsp;<span style="font-size:10px;color:var(--dim)">INFLATION: ${d.inflation||'--'} &nbsp; GST: ${d.gst_latest_month||'--'}</span></div>
+    </div>`;
+}
+
+function renderStateTaxBars(arr) {
+  const el = document.getElementById('state-tax-bars');
+  const max = Math.max(...arr.map(s=>s.pct||0));
+  el.innerHTML = arr.map(s => {
+    const pct = max > 0 ? (s.pct/max*100).toFixed(0) : 50;
+    const col = s.pct > 70 ? '#FF9933' : s.pct > 40 ? '#ffd700' : '#4caf50';
+    return `<div class="br">
+      <div class="bl">${(s.state||'').substring(0,8)}</div>
+      <div class="bt"><div class="bf" style="width:${pct}%;background:linear-gradient(90deg,${col}66,${col})"></div></div>
+      <div class="bv" style="color:${col}">${s.tax||'--'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderProjectSectorBars(arr) {
+  const sectors = {};
+  arr.forEach(p => { sectors[p.sector||'OTHER'] = (sectors[p.sector||'OTHER']||0) + 1; });
+  const total = arr.length || 1;
+  const el = document.getElementById('proj-sector-bars');
+  el.innerHTML = Object.entries(sectors).map(([s,c]) => {
+    const pct = Math.round(c/total*100);
+    const cols = {RAIL:'#ffd700',ROAD:'#FF9933',ENERGY:'#ff4444',DIGITAL:'#4fc3f7',DEFENCE:'#ab47bc',OTHER:'#4caf50'};
+    const col = cols[s]||'#4caf50';
+    return `<div class="br">
+      <div class="bl">${s.substring(0,8)}</div>
+      <div class="bt"><div class="bf" style="width:${pct}%;background:linear-gradient(90deg,${col}55,${col})"></div></div>
+      <div class="bv" style="color:${col}">${c} proj</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPeaceBarsLeft(states) {
+  if (!states) return;
+  const el = document.getElementById('peace-bars-left');
+  el.innerHTML = states.map(s => {
+    const col = s.index > 70 ? '#4caf50' : s.index > 50 ? '#ffd700' : '#ff4444';
+    return `<div class="br">
+      <div class="bl">${(s.state||'').substring(0,8)}</div>
+      <div class="bt"><div class="bf" style="width:${s.index}%;background:linear-gradient(90deg,${col}55,${col})"></div></div>
+      <div class="bv" style="color:${col}">${s.index}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDefenceBarsLeft(commands) {
+  if (!commands) return;
+  const el = document.getElementById('defence-bars-left');
+  el.innerHTML = commands.map(c => {
+    const col = c.readiness > 75 ? '#ff4444' : c.readiness > 60 ? '#ffd700' : '#4caf50';
+    return `<div class="br">
+      <div class="bl" style="font-size:9px">${(c.name||'').replace(' Command','')}</div>
+      <div class="bt"><div class="bf" style="width:${c.readiness}%;background:linear-gradient(90deg,${col}55,${col})"></div></div>
+      <div class="bv" style="color:${col};font-size:8px">${c.status||'--'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSchemeBars(arr) {
+  const el = document.getElementById('scheme-bars');
+  el.innerHTML = arr.map(s => `<div class="br">
+    <div class="bl" style="font-size:8px;width:80px">${(s.name||'').substring(0,12)}</div>
+    <div class="bt"><div class="bf" style="width:${s.pct||0}%;background:linear-gradient(90deg,${s.color||'#FF9933'}55,${s.color||'#FF9933'})"></div></div>
+    <div class="bv" style="color:${s.color||'#FF9933'}">${s.pct||0}%</div>
+  </div>`).join('');
+}
+
+function renderAlertFeed(arr) {
+  const el = document.getElementById('feed-wrap');
+  el.innerHTML = arr.map(a => `<div class="ai">
+    <div class="ad ${a.level||'m'}"></div>
+    <div>
+      <div class="at">${a.title||'Alert'}</div>
+      <div class="am">${(a.location||'INDIA').toUpperCase()} • ${a.time||'RECENT'} ${a.category?'• '+a.category:''}</div>
+    </div>
+  </div>`).join('');
+}
+
+function updateAlertCount(arr) {
+  const high = arr.filter(a=>a.level==='high').length;
+  const pill = document.getElementById('alert-count-pill');
+  pill.innerHTML = `<div class="blink"></div>${high} HIGH ALERT${high!==1?'S':''}`;
+}
+
+function renderExpBars(arr) {
+  const el = document.getElementById('exp-bars');
+  el.innerHTML = arr.map(e => `<div class="br">
+    <div class="bl" style="font-size:9px;width:75px">${(e.sector||'').substring(0,11)}</div>
+    <div class="bt"><div class="bf" style="width:${e.pct||0}%;background:linear-gradient(90deg,${e.color||'#FF9933'}55,${e.color||'#FF9933'})"></div></div>
+    <div class="bv" style="color:${e.color||'#FF9933'}">${e.pct||0}%</div>
+  </div>`).join('');
+}
+
+function renderProjectList(arr) {
+  const el = document.getElementById('proj-list');
+  el.innerHTML = arr.map(p => {
+    const smap = {'ACTIVE':'#FF9933','ON TRACK':'#4caf50','DELAYED':'#ff4444','PLANNING':'#ffd700','NEAR COMPLETE':'#4fc3f7'};
+    const sc = smap[p.status||'ACTIVE']||'#FF9933';
+    return `<div class="pj">
+      <div class="pjn">${p.name||'Project'}</div>
+      <div class="pjm">${p.state||'India'} | ${p.budget||'--'}</div>
+      <div class="pjb">
+        <div class="pjt"><div class="pjf" style="width:${p.progress||0}%;background:${sc}"></div></div>
+        <div class="pjp" style="color:${sc}">${p.progress||0}%</div>
+        <div class="pjs" style="color:${sc};border-color:${sc}">${p.status||'--'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPeaceMetrics(d) {
+  const el = document.getElementById('peace-metrics');
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">NATIONAL PEACE INDEX</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ffd700">${d.national_index||'--'}/100</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">GLOBAL RANK</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text)">${d.rank_global||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">INCIDENTS YTD</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--red)">${d.incidents_ytd||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">ACTIVE CONFLICT ZONES</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ffd700">${d.conflict_zones||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">CRIME RATE TREND</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#4caf50">${d.crime_trend||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0">
+      <span style="font-size:10px;color:var(--dim)">PEACEKEEPERS DEPLOYED</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--a3)">${d.peacekeepers||'--'}</span>
+    </div>`;
+}
+
+function renderDefenceMetrics(d) {
+  const el = document.getElementById('def-metrics');
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">DEFENCE BUDGET</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--saffron)">${d.budget||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">% OF GDP</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text)">${d.budget_gdp_pct||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">ACTIVE PERSONNEL</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--a3)">${d.active_personnel||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">DEFENCE EXPORTS</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#4caf50">${d.exports||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:10px;color:var(--dim)">GLOBAL RANK</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--yellow)">#${d.rank_global||'--'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0">
+      <span style="font-size:10px;color:var(--dim)">READINESS LEVEL</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ffd700">${d.readiness||'--'}</span>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════
+//  GST CANVAS CHART
+// ══════════════════════════════════════════════
+async function drawGSTChart() {
+  const canvas = document.getElementById('gst-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth || 270;
+  canvas.height = 72;
+
+  // Fetch 12-month GST data
+  const sys = `You are a data analyst. Return ONLY a JSON array of 12 numbers, no text.`;
+  const usr = `Search for India's GST collection monthly data for FY2025-26 (Apr 2025 to Mar 2026) in ₹ Lakh Crore. Return ONLY a JSON array of 12 numbers like: [1.78,1.85,1.92,...]. Use real data where available, project where needed.`;
+  const txt = await callAI(sys, usr, true, 200);
+  let data;
+  try {
+    const clean = txt.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
+    const s = clean.indexOf('['); const e = clean.lastIndexOf(']');
+    data = JSON.parse(clean.slice(s,e+1));
+  } catch(e) { data = [1.78,1.85,1.92,2.1,1.98,2.14,2.07,2.22,2.18,2.34,2.28,2.45]; }
+
+  const months = ['A','M','J','J','A','S','O','N','D','J','F','M'];
+  const w = canvas.width, h = canvas.height;
+  const max = Math.max(...data), min = Math.min(...data);
+  const pad = {t:10,r:8,b:18,l:28};
+  const gw = w-pad.l-pad.r, gh = h-pad.t-pad.b;
+
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=.5;
+  [0,.5,1].forEach(f=>{ const y=pad.t+gh*(1-f); ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke(); });
+
+  const pts = data.map((v,i)=>({x:pad.l+(i/(data.length-1))*gw, y:pad.t+gh-((v-min)/(max-min||1))*gh}));
+  const grad = ctx.createLinearGradient(0,pad.t,0,h-pad.b);
+  grad.addColorStop(0,'rgba(255,153,51,0.28)'); grad.addColorStop(1,'rgba(255,153,51,0)');
+  ctx.beginPath(); ctx.moveTo(pts[0].x,h-pad.b);
+  pts.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.lineTo(pts[pts.length-1].x,h-pad.b); ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  pts.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle='#FF9933'; ctx.lineWidth=1.5; ctx.stroke();
+  pts.forEach(p=>{ ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fillStyle='#FF9933';ctx.fill(); });
+  ctx.fillStyle='rgba(200,220,230,0.35)'; ctx.font='7px Share Tech Mono'; ctx.textAlign='center';
+  months.forEach((m,i)=>ctx.fillText(m,pts[i].x,h-3));
+  ctx.fillStyle='rgba(255,153,51,0.5)'; ctx.textAlign='right';
+  ctx.fillText('₹L Cr',pad.l-2,pad.t+7);
+}
+
+// ══════════════════════════════════════════════
+//  MAP COLORING
+// ══════════════════════════════════════════════
+function colorMapByTax(arr) {
+  // Reset all
+  document.querySelectorAll('.st').forEach(p=>{ p.style.fill='#0c1824'; });
+  if (!arr) return;
+  const max = Math.max(...arr.map(s=>s.pct||0));
+  const stateMap = {
+    'Maharashtra':'st-MH','Karnataka':'st-KA','Delhi':'st-DL','Gujarat':'st-GJ',
+    'Tamil Nadu':'st-TN','Uttar Pradesh':'st-UP','Telangana':'st-TG','West Bengal':'st-WB',
+    'Rajasthan':'st-RJ','Madhya Pradesh':'st-MP','Andhra Pradesh':'st-AP','Bihar':'st-BR',
+    'Punjab':'st-PB','Haryana':'st-HR','Odisha':'st-OD','Chhattisgarh':'st-CG',
+    'Kerala':'st-KL','Jharkhand':'st-JH','Assam':'st-AS'
+  };
+  arr.forEach(s => {
+    const id = stateMap[s.state];
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    const ratio = (s.pct||0) / (max||1);
+    if (ratio > 0.8)      el.style.fill = '#1c360c';
+    else if (ratio > 0.6) el.style.fill = '#172c0a';
+    else if (ratio > 0.4) el.style.fill = '#12220a';
+    else if (ratio > 0.2) el.style.fill = '#0d1a08';
+    else                  el.style.fill = '#0c1620';
+  });
+}
+
+// ══════════════════════════════════════════════
+//  STATE INTERACTION
+// ══════════════════════════════════════════════
+document.querySelectorAll('.st').forEach(path => {
+  path.addEventListener('mouseover', function(e) {
+    const name = this.dataset.state;
+    document.getElementById('hover-info').textContent = name.toUpperCase() + ' — CLICK FOR LIVE DETAIL';
+    const tt = document.getElementById('tt');
+    tt.style.display = 'block';
+    tt.style.left = (e.clientX - 270 + 10) + 'px';
+    tt.style.top  = (e.clientY - 46 + 10) + 'px';
+    tt.innerHTML  = `<div class="tth">${name}</div><div style="font-size:10px;color:var(--dim);font-family:'Share Tech Mono',monospace">CLICK TO LOAD LIVE DATA</div>`;
+  });
+  path.addEventListener('mousemove', function(e) {
+    const tt = document.getElementById('tt');
+    tt.style.left = (e.clientX - 270 + 10) + 'px';
+    tt.style.top  = (e.clientY - 46 + 10) + 'px';
+  });
+  path.addEventListener('mouseout', function() {
+    document.getElementById('tt').style.display = 'none';
+    document.getElementById('hover-info').textContent = 'HOVER OVER STATE';
+  });
+  path.addEventListener('click', function() {
+    document.querySelectorAll('.st').forEach(p=>p.classList.remove('sel'));
+    this.classList.add('sel');
+    document.getElementById('sel-state').textContent = this.dataset.state.toUpperCase();
+    fetchStateDetail(this.dataset.state);
+  });
+});
+
+function onCityClick(state) {
+  fetchStateDetail(state);
+}
+
+function showStatePopup(d) {
+  document.getElementById('spop-name').textContent = (d.state||'STATE').toUpperCase();
+  document.getElementById('spop-grid').innerHTML = `
+    <div class="ps"><div class="psl">CAPITAL</div><div class="psv">${d.capital||'--'}</div></div>
+    <div class="ps"><div class="psl">POPULATION</div><div class="psv">${d.population||'--'}</div></div>
+    <div class="ps"><div class="psl">GDP CONTRIB.</div><div class="psv">${d.gdp_contribution||'--'}</div></div>
+    <div class="ps"><div class="psl">TAX REVENUE</div><div class="psv">${d.tax_revenue||'--'}</div></div>
+    <div class="ps"><div class="psl">EXPENDITURE</div><div class="psv">${d.expenditure||'--'}</div></div>
+    <div class="ps"><div class="psl">PEACE INDEX</div><div class="psv">${d.peace_index||'--'}/100</div></div>
+    <div class="ps"><div class="psl">CHIEF MINISTER</div><div class="psv">${d.cm||'--'}</div></div>
+    <div class="ps"><div class="psl">LITERACY</div><div class="psv">${d.literacy||'--'}</div></div>`;
+  document.getElementById('spop').style.display = 'block';
+  hideBanner();
+}
+
+function closePopup() { document.getElementById('spop').style.display = 'none'; }
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+function switchTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.tab-l').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab-r').forEach(t=>t.style.display='none');
+  const tl = document.getElementById('tl-'+tab);
+  const tr = document.getElementById('tr-'+tab);
+  if (tl) tl.style.display = 'block';
+  if (tr) tr.style.display = 'block';
+  // Trigger appropriate fetch if no data
+  if (tab === 'projects' && !liveData.projects) fetchProjects();
+  if (tab === 'peace'    && !liveData.peace)    fetchPeaceIndex();
+  if (tab === 'defence'  && !liveData.defence)  fetchDefence();
+}
+
+// ══════════════════════════════════════════════
+//  LAYER TOGGLES
+// ══════════════════════════════════════════════
+function toggleLayer(id, el) {
+  const chk  = el.querySelector('.lchk');
+  const on   = chk.style.opacity !== '0.3';
+  chk.style.opacity = on ? '0.3' : '1';
+  const layerMap = { tax:'city-layer', projects:'project-layer', alerts:'alert-layer' };
+  const lyr = document.getElementById(layerMap[id]);
+  if (lyr) lyr.style.display = on ? 'none' : 'block';
+}
+
+// ══════════════════════════════════════════════
+//  BANNER HELPERS
+// ══════════════════════════════════════════════
+function showBanner(msg) { const b = document.getElementById('map-status'); b.textContent = '⟳ '+msg; b.style.display = 'block'; }
+function hideBanner()    { document.getElementById('map-status').style.display = 'none'; }
+
+// ══════════════════════════════════════════════
+//  AI CHAT
+// ══════════════════════════════════════════════
+function toggleAI() {
+  const p = document.getElementById('ai-wrap');
+  p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+}
+
+async function sendAI() {
+  const inp = document.getElementById('ai-in');
+  const msg = inp.value.trim(); if (!msg) return;
+  inp.value = '';
+  const msgs = document.getElementById('ai-msgs');
+  const ud = document.createElement('div'); ud.className='amsg u'; ud.textContent=msg; msgs.appendChild(ud);
+  const ld = document.createElement('div'); ld.className='amsg b ld'; ld.textContent='⟳ Searching live India data...'; msgs.appendChild(ld);
+  msgs.scrollTop = msgs.scrollHeight;
+  try {
+    const reply = await callAI(
+      `You are the Bharat Monitor AI Analyst — an expert on India's government, fiscal policy, state governance, mega projects, defence, and current affairs. Use web search to get current data. Be concise (3-5 sentences), precise, and use ₹ for INR. Today is March 2026.`,
+      msg, true, 500
+    );
+    ld.remove();
+    const bd = document.createElement('div'); bd.className='amsg b'; bd.textContent=reply; msgs.appendChild(bd);
+  } catch(e) {
+    ld.textContent = 'API error. Check connection.'; ld.style.color='#ff7777';
+  }
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ══════════════════════════════════════════════
+//  CREDITS
+// ══════════════════════════════════════════════
+function showCredits() { document.getElementById('cred-overlay').style.display='flex'; }
+function hideCredits() { document.getElementById('cred-overlay').style.display='none'; }
+
+// ══════════════════════════════════════════════
+//  COORDINATES ON MAP HOVER
+// ══════════════════════════════════════════════
+document.getElementById('svg-map').addEventListener('mousemove', function(e) {
+  const r = this.getBoundingClientRect();
+  const x = (e.clientX-r.left)/r.width;
+  const y = (e.clientY-r.top)/r.height;
+  document.getElementById('coords').textContent =
+    `${(38-y*30).toFixed(2)}°N ${(67+x*30).toFixed(2)}°E`;
+});
+
+// ══════════════════════════════════════════════
+//  REFRESH ENGINE
+// ══════════════════════════════════════════════
+async function refreshAll() {
+  const btn = document.getElementById('refresh-btn');
+  btn.textContent = '⟳ REFRESHING...';
+  btn.style.opacity = '0.7';
+  btn.disabled = true;
+
+  // Update data freshness timestamp
+  document.getElementById('data-age').textContent = 'DATA: ' + new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit'}) + ' IST';
+
+  // Run all fetches in parallel (grouped to avoid rate limits)
+  try {
+    await Promise.allSettled([fetchOverview(), fetchAlerts(), fetchTicker()]);
+    await Promise.allSettled([fetchStateTax(), fetchExpenditure(), fetchSchemes()]);
+    await Promise.allSettled([fetchProjects(), fetchPeaceIndex(), fetchDefence()]);
+    await drawGSTChart();
+  } catch(e) { console.error('Refresh error:', e); }
+
+  hideBanner();
+  btn.textContent = '⟳ REFRESH NOW';
+  btn.style.opacity = '1';
+  btn.disabled = false;
+
+  // Schedule next refresh
+  scheduleNextRefresh();
+}
+
+function scheduleNextRefresh() {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  nextRefreshTime = Date.now() + REFRESH_INTERVAL_MS;
+  refreshTimer = setTimeout(refreshAll, REFRESH_INTERVAL_MS);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+window.addEventListener('load', () => {
+  // Init tab display
+  document.querySelectorAll('.tab-l').forEach((t,i)=>{ if(i>0) t.style.display='none'; });
+  document.querySelectorAll('.tab-r').forEach((t,i)=>{ if(i>0) t.style.display='none'; });
+
+  // Kick off full data load
+  refreshAll();
+});
+</script>
+</body>
+</html>
