@@ -3,1356 +3,1549 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BHARAT MONITOR — India Intelligence Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+<title>BHARAT MONITOR v2 — India Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --saffron: #FF9933;
-  --green: #138808;
-  --navy: #000080;
-  --bg: #04080d;
-  --bg2: #070d14;
-  --bg3: #0a1520;
-  --panel: rgba(7,13,22,0.96);
-  --border: rgba(255,153,51,0.18);
-  --border-hi: rgba(255,153,51,0.65);
-  --text: #b8ccd8;
-  --dim: #4a6475;
-  --accent: #FF9933;
-  --a2: #138808;
-  --a3: #4fc3f7;
-  --red: #ff3d3d;
-  --yellow: #ffd700;
-  --glow: 0 0 24px rgba(255,153,51,0.25);
+:root{
+  --bg:#03070d; --bg2:#060c14; --panel:rgba(5,10,18,0.97);
+  --saffron:#FF9933; --green:#22c55e; --blue:#38bdf8;
+  --red:#f43f5e; --yellow:#fbbf24; --purple:#a78bfa;
+  --teal:#2dd4bf; --orange:#fb923c; --pink:#f472b6;
+  --border:rgba(255,153,51,0.15); --border2:rgba(255,153,51,0.55);
+  --text:#94a3b8; --bright:#e2e8f0; --dim:#475569;
+  --glow:0 0 20px rgba(255,153,51,0.2);
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100vh; width:100vw; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Rajdhani',sans-serif; }
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100vh;width:100vw;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.02) 2px,rgba(0,0,0,0.02) 4px);}
 
-body::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
-  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);
-}
+/* TOPBAR */
+#bar{height:44px;background:rgba(3,7,13,0.99);border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;padding:0 12px;gap:10px;z-index:300;position:relative;
+  box-shadow:0 2px 30px rgba(255,153,51,0.12);}
+.logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--saffron);
+  letter-spacing:3px;text-shadow:0 0 16px rgba(255,153,51,0.6);white-space:nowrap;}
+.logo b{color:var(--blue);}
+.sep{width:1px;height:24px;background:var(--border);flex-shrink:0;}
+#clock{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--saffron);letter-spacing:2px;}
+.chip{padding:2px 8px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  display:flex;align-items:center;gap:4px;border-radius:1px;}
+.chip.live{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#4ade80;}
+.chip.warn{background:rgba(244,63,94,0.12);border:1px solid rgba(244,63,94,0.4);color:#fb7185;}
+.chip.q{background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);color:var(--blue);}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+.sp{flex:1;}
+.tbtn{padding:4px 12px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  cursor:pointer;border:1px solid transparent;background:transparent;color:var(--dim);transition:all .15s;text-transform:uppercase;}
+.tbtn:hover{color:var(--saffron);border-color:var(--border);}
+.tbtn.on{color:var(--saffron);border-color:var(--border2);background:rgba(255,153,51,0.06);}
+#rbtn{padding:4px 11px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.4);color:#4ade80;cursor:pointer;
+  display:flex;align-items:center;gap:5px;transition:all .2s;}
+#rbtn:hover{background:rgba(34,197,94,0.2);}
+#rbtn.spin span{animation:rspin 1s linear infinite;}
+@keyframes rspin{to{transform:rotate(360deg);display:inline-block;}}
+#cdbtn{padding:4px 12px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.35);color:var(--blue);cursor:pointer;transition:all .2s;}
+#cdbtn:hover{background:rgba(56,189,248,0.2);}
+#nxt{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);}
+#qstat{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--blue);}
 
-/* ── TOPBAR ── */
-#topbar {
-  height:46px; background:rgba(4,8,13,0.99); border-bottom:1px solid var(--border-hi);
-  display:flex; align-items:center; padding:0 14px; gap:12px; position:relative; z-index:200;
-  box-shadow:0 2px 18px rgba(255,153,51,0.18);
-}
-.logo { font-family:'Orbitron',monospace; font-size:17px; font-weight:900; color:var(--saffron); letter-spacing:3px; text-shadow:0 0 18px rgba(255,153,51,0.7); }
-.logo em { color:var(--a3); font-style:normal; }
-.vsep { width:1px; height:26px; background:var(--border); flex-shrink:0; }
-#clock { font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--accent); letter-spacing:2px; }
-.pill { padding:2px 9px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; border-radius:1px; display:flex; align-items:center; gap:5px; }
-.pill.live { background:rgba(19,136,8,0.15); border:1px solid #138808; color:#55e055; }
-.pill.warn { background:rgba(255,61,61,0.15); border:1px solid var(--red); color:#ff7777; }
-.blink { width:5px; height:5px; border-radius:50%; background:currentColor; animation:blink 1s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
-.spacer { flex:1; }
-.nav-tab { padding:5px 14px; font-family:'Rajdhani',sans-serif; font-weight:600; font-size:12px; letter-spacing:1.5px; cursor:pointer; border:1px solid transparent; background:transparent; color:var(--dim); transition:all .18s; text-transform:uppercase; }
-.nav-tab:hover { color:var(--accent); border-color:var(--border); }
-.nav-tab.active { color:var(--accent); border-color:var(--border-hi); background:rgba(255,153,51,0.07); }
-#refresh-btn {
-  padding:5px 12px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px;
-  background:rgba(19,136,8,0.12); border:1px solid rgba(19,136,8,0.5); color:#55e055; cursor:pointer; transition:all .2s;
-  display:flex; align-items:center; gap:5px;
-}
-#refresh-btn:hover { background:rgba(19,136,8,0.25); }
-#refresh-btn.loading { animation:spin 1s linear infinite; }
-@keyframes spin { to { transform:rotate(360deg); } }
-#credits-btn {
-  padding:5px 14px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px;
-  background:rgba(79,195,247,0.1); border:1px solid rgba(79,195,247,0.4); color:var(--a3); cursor:pointer; transition:all .2s;
-}
-#credits-btn:hover { background:rgba(79,195,247,0.2); border-color:var(--a3); }
-#next-refresh { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:1px; }
+/* LAYOUT */
+#app{display:grid;grid-template-columns:220px 1fr 270px;height:calc(100vh - 44px);overflow:hidden;}
 
-/* ── LAYOUT ── */
-#main { display:grid; grid-template-columns:270px 1fr 290px; height:calc(100vh - 46px); overflow:hidden; }
-.panel { background:var(--panel); border-right:1px solid var(--border); overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; }
-.panel::-webkit-scrollbar { width:3px; }
-.panel::-webkit-scrollbar-thumb { background:var(--border-hi); }
+/* LEFT SIDEBAR */
+#sidebar{background:var(--panel);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;}
+#sidebar::-webkit-scrollbar{width:2px;}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border2);}
+.sb-sec{border-bottom:1px solid var(--border);padding:8px 10px;}
+.sb-h{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:2px;
+  margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.sb-h::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* ── SECTION ── */
-.sec { border-bottom:1px solid var(--border); padding:10px 12px; }
-.sec-title { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:7px; }
-.sec-title::after { content:''; flex:1; height:1px; background:var(--border); }
+/* LAYER TOGGLE */
+.lyr{display:flex;align-items:center;gap:7px;padding:4px 3px;cursor:pointer;
+  border-radius:2px;transition:background .15s;margin-bottom:1px;}
+.lyr:hover{background:rgba(255,153,51,0.05);}
+.lck{width:10px;height:10px;border-radius:1px;border:1px solid;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;
+  transition:all .15s;}
+.lck.on{color:#000;}
+.lic{font-size:12px;width:16px;text-align:center;flex-shrink:0;}
+.lnm{font-size:10px;font-weight:600;flex:1;letter-spacing:.3px;}
+.lct{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);}
+.lld{width:6px;height:6px;border-radius:50%;animation:blink .8s infinite;flex-shrink:0;}
 
-/* ── STAT GRID ── */
-.sg { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.sc { background:rgba(255,153,51,0.03); border:1px solid var(--border); padding:8px 9px; position:relative; overflow:hidden; cursor:default; transition:border-color .2s; }
-.sc:hover { border-color:var(--border-hi); }
-.sc::before { content:''; position:absolute; top:0; left:0; width:2px; height:100%; background:var(--accent); }
-.sc.g::before { background:var(--a2); } .sc.b::before { background:var(--a3); } .sc.r::before { background:var(--red); }
-.sl { font-size:9px; color:var(--dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
-.sv { font-family:'Orbitron',monospace; font-size:15px; font-weight:700; color:#fff; line-height:1; }
-.su { font-size:9px; color:var(--dim); }
-.sd { font-size:10px; margin-top:2px; }
-.up { color:#4caf50; } .dn { color:var(--red); }
+/* MINI STATS */
+.mstat{background:rgba(255,153,51,0.03);border:1px solid var(--border);padding:6px 8px;
+  margin-bottom:5px;position:relative;overflow:hidden;transition:border-color .2s;cursor:default;}
+.mstat:hover{border-color:var(--border2);}
+.mstat::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;}
+.mstat.s{--c:var(--saffron)}.mstat.g{--c:#22c55e}.mstat.b{--c:var(--blue)}.mstat.r{--c:var(--red)}.mstat.p{--c:var(--purple)}
+.mstat::before{background:var(--c,var(--saffron));}
+.msl{font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;}
+.msv{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--bright);line-height:1.1;}
+.msd{font-size:9px;margin-top:1px;}
+.sk{background:linear-gradient(90deg,rgba(255,153,51,0.03) 25%,rgba(255,153,51,0.09) 50%,rgba(255,153,51,0.03) 75%);
+  background-size:200% 100%;animation:sk 1.3s infinite;height:10px;border-radius:1px;margin-bottom:3px;}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* ── LOADING SKELETON ── */
-.skel { background:linear-gradient(90deg,rgba(255,153,51,0.04) 25%,rgba(255,153,51,0.1) 50%,rgba(255,153,51,0.04) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; height:12px; border-radius:2px; margin-bottom:4px; }
-@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+/* MAP CENTER */
+#mc{position:relative;background:#020508;overflow:hidden;display:flex;flex-direction:column;}
+#mhdr{padding:6px 12px;background:rgba(3,7,13,0.96);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:10;}
+.mttl{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--saffron);letter-spacing:2px;}
+#hinfo{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);}
+#svg-map{flex:1;width:100%;overflow:visible;}
 
-/* ── BAR ROWS ── */
-.br { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
-.bl { font-size:10px; width:68px; flex-shrink:0; color:var(--text); }
-.bt { flex:1; height:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); position:relative; overflow:hidden; }
-.bf { height:100%; transition:width 1.2s ease; position:relative; }
-.bf::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08)); }
-.bv { font-family:'Share Tech Mono',monospace; font-size:9px; width:48px; text-align:right; flex-shrink:0; }
+/* STATE PATHS */
+.st{fill:#0a1520;stroke:rgba(255,153,51,0.3);stroke-width:.6;cursor:pointer;transition:all .25s;}
+.st:hover{stroke:var(--saffron);stroke-width:1.3;filter:brightness(1.6);}
+.st.sel{stroke:var(--yellow);stroke-width:1.8;filter:brightness(1.9);}
+/* Tax tiers */
+.t5{fill:#1e3d0c}.t4{fill:#183209}.t3{fill:#112606}.t2{fill:#0d1d05}.t1{fill:#0a1520}
+/* Heat tiers (AQI/pollution) */
+.h4{fill:#3d1a0c}.h3{fill:#2d1208}.h2{fill:#1d0d05}.h1{fill:#0a1520}
 
-/* ── MAP ── */
-#map-wrap { position:relative; background:#030710; overflow:hidden; display:flex; flex-direction:column; }
-#mhdr { padding:7px 14px; background:rgba(4,8,13,0.95); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; z-index:10; }
-.mt { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; color:var(--saffron); letter-spacing:2px; }
-#svg-map { flex:1; width:100%; overflow:visible; }
-#map-status { position:absolute; top:44px; left:50%; transform:translateX(-50%); background:rgba(4,8,13,0.92); border:1px solid var(--border-hi); padding:6px 16px; font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--accent); z-index:20; display:none; }
+/* MAP MARKERS */
+.mk{cursor:pointer;} .mk:hover circle{filter:brightness(1.4);}
+.pulse-ring{animation:pr 2s ease-in-out infinite;}
+@keyframes pr{0%,100%{r:5;opacity:.9}50%{r:12;opacity:.25}}
+.glowing{animation:gl 2s ease-in-out infinite;}
+@keyframes gl{0%,100%{opacity:.8}50%{opacity:.3}}
 
-/* ── MAP STATES ── */
-.st { fill:#0c1824; stroke:rgba(255,153,51,0.35); stroke-width:.7; cursor:pointer; transition:all .25s; }
-.st:hover { stroke:var(--saffron); stroke-width:1.4; filter:brightness(1.5); }
-.st.sel { stroke:var(--yellow); stroke-width:2; filter:brightness(1.8); }
-.st.t5 { fill:#1c350a; } .st.t4 { fill:#16290a; } .st.t3 { fill:#101e09; } .st.t2 { fill:#0c1808; } .st.t1 { fill:#0c1620; }
+/* RIVER PATHS */
+.riv{fill:none;stroke:#1e4d7a;stroke-width:1.5;opacity:.7;}
+.riv.poll{stroke:#5c3317;animation:rpoll 3s ease-in-out infinite;}
+@keyframes rpoll{0%,100%{stroke:#5c3317;stroke-width:1.5}50%{stroke:#8b4513;stroke-width:2.5}}
 
-/* pulse dots */
-.pdot { cursor:pointer; }
-.pring { animation:pr 2.2s ease-in-out infinite; }
-@keyframes pr { 0%,100%{r:4;opacity:1} 50%{r:10;opacity:.3} }
+/* TOOLTIP */
+#tt{position:absolute;pointer-events:none;background:rgba(3,7,13,0.98);
+  border:1px solid var(--border2);padding:8px 11px;z-index:200;min-width:170px;display:none;
+  box-shadow:var(--glow);max-width:250px;}
+.tth{font-family:'Orbitron',monospace;font-size:11px;color:var(--saffron);margin-bottom:6px;}
+.ttr{display:flex;justify-content:space-between;gap:12px;margin-bottom:2px;}
+.ttk{color:var(--dim);font-size:9px;}.ttv{color:var(--bright);font-size:9px;font-family:'Share Tech Mono',monospace;}
+.tt-badge{display:inline-block;padding:1px 5px;border-radius:1px;font-size:8px;font-family:'Share Tech Mono',monospace;margin-top:4px;}
 
-/* ── TOOLTIP ── */
-#tt { position:absolute; pointer-events:none; background:rgba(4,8,13,0.97); border:1px solid var(--border-hi); padding:9px 12px; font-size:11px; z-index:150; min-width:175px; display:none; box-shadow:var(--glow); }
-.tth { font-family:'Orbitron',monospace; font-size:12px; color:var(--saffron); margin-bottom:7px; }
-.ttr { display:flex; justify-content:space-between; gap:14px; margin-bottom:2px; }
-.ttk { color:var(--dim); font-size:10px; } .ttv { color:#fff; font-weight:600; font-size:10px; font-family:'Share Tech Mono',monospace; }
+/* STATE POPUP */
+#spop{position:absolute;top:48px;left:50%;transform:translateX(-50%);
+  background:rgba(3,7,13,0.99);border:1px solid var(--border2);padding:12px 14px;
+  z-index:60;display:none;min-width:340px;max-width:400px;box-shadow:0 0 40px rgba(255,153,51,0.15);}
+.pc{position:absolute;top:6px;right:8px;cursor:pointer;color:var(--dim);font-size:13px;}
+.pt{font-family:'Orbitron',monospace;font-size:13px;color:var(--saffron);margin-bottom:8px;letter-spacing:2px;}
+.pg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.ps{background:rgba(255,153,51,0.03);border:1px solid var(--border);padding:6px 7px;}
+.psl{font-size:8px;color:var(--dim);letter-spacing:.8px;text-transform:uppercase;}
+.psv{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--bright);margin-top:1px;}
+.pi-bar{margin-top:6px;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;}
+.pi-fill{height:100%;border-radius:2px;transition:width 1s ease;}
 
-/* ── STATE POPUP ── */
-#spop { position:absolute; top:50px; left:50%; transform:translateX(-50%); background:rgba(4,8,13,0.98); border:1px solid var(--border-hi); padding:13px 16px; z-index:50; display:none; min-width:320px; box-shadow:0 0 32px rgba(255,153,51,0.18); max-width:380px; }
-.pc { position:absolute; top:7px; right:10px; cursor:pointer; color:var(--dim); font-size:15px; }
-.pt { font-family:'Orbitron',monospace; font-size:14px; color:var(--saffron); margin-bottom:10px; letter-spacing:2px; }
-.pg { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.ps { background:rgba(255,153,51,0.04); border:1px solid var(--border); padding:7px 9px; }
-.psl { font-size:9px; color:var(--dim); letter-spacing:1px; }
-.psv { font-family:'Share Tech Mono',monospace; font-size:13px; color:#fff; margin-top:2px; }
+/* LEGEND */
+#mleg{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
+  background:rgba(3,7,13,0.93);border:1px solid var(--border);padding:4px 12px;
+  display:flex;gap:12px;font-size:9px;font-family:'Share Tech Mono',monospace;z-index:15;flex-wrap:wrap;max-width:500px;}
+.li{display:flex;align-items:center;gap:4px;}
+.ld{width:7px;height:7px;border-radius:50%;}
+.ld.sq{border-radius:0;}
 
-/* ── LEGEND ── */
-#mleg { position:absolute; bottom:38px; left:50%; transform:translateX(-50%); background:rgba(4,8,13,0.92); border:1px solid var(--border); padding:5px 14px; display:flex; gap:14px; font-size:10px; font-family:'Share Tech Mono',monospace; z-index:15; }
-.li { display:flex; align-items:center; gap:5px; }
-.ld { width:8px; height:8px; border-radius:50%; }
+/* TICKER */
+#ticker{position:absolute;bottom:0;left:0;right:0;height:25px;background:rgba(3,7,13,0.98);
+  border-top:1px solid var(--border);display:flex;align-items:center;z-index:20;overflow:hidden;}
+.tklbl{padding:0 9px;background:var(--saffron);color:#000;font-family:'Share Tech Mono',monospace;
+  font-size:9px;font-weight:700;letter-spacing:1px;height:100%;display:flex;align-items:center;flex-shrink:0;}
+#tk{white-space:nowrap;animation:tksc 90s linear infinite;font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:var(--text);padding-left:24px;}
+@keyframes tksc{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-/* ── TICKER ── */
-#ticker { position:absolute; bottom:0; left:0; right:0; height:27px; background:rgba(4,8,13,0.97); border-top:1px solid var(--border); display:flex; align-items:center; z-index:20; overflow:hidden; }
-.tlbl { padding:0 10px; background:var(--saffron); color:#000; font-family:'Share Tech Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; height:100%; display:flex; align-items:center; flex-shrink:0; }
-#tk { white-space:nowrap; animation:tkscr 80s linear infinite; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text); padding-left:28px; }
-@keyframes tkscr { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+/* BBAR */
+#bbar{position:absolute;left:220px;right:270px;bottom:25px;height:25px;
+  background:rgba(3,7,13,0.96);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 8px;gap:12px;z-index:15;
+  font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);}
+#coords{color:var(--blue);}
 
-/* ── BOTTOM BAR ── */
-#bbar { position:absolute; left:270px; right:290px; bottom:27px; height:27px; background:rgba(4,8,13,0.95); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 10px; gap:14px; z-index:15; font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); }
-#coords { color:var(--a3); }
+/* RIGHT PANEL */
+#rp{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--panel);}
+.rp-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.rptb{flex:1;padding:6px 4px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.8px;
+  cursor:pointer;border:none;background:transparent;color:var(--dim);transition:all .15s;text-align:center;}
+.rptb:hover{color:var(--saffron);}
+.rptb.on{color:var(--saffron);border-bottom:2px solid var(--saffron);background:rgba(255,153,51,0.04);}
+#rp-body{overflow-y:auto;flex:1;}
+#rp-body::-webkit-scrollbar{width:2px;}
+#rp-body::-webkit-scrollbar-thumb{background:var(--border2);}
+.rp-sec{border-bottom:1px solid var(--border);padding:8px 10px;}
+.rp-h{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:2px;margin-bottom:7px;
+  display:flex;align-items:center;gap:6px;}
+.rp-h::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* ── AI PANEL ── */
-#ai-wrap { position:absolute; right:295px; bottom:58px; width:380px; background:rgba(4,8,13,0.98); border:1px solid var(--border-hi); box-shadow:var(--glow); z-index:80; display:none; flex-direction:column; max-height:430px; }
-.aih { padding:9px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:7px; background:rgba(255,153,51,0.05); }
-.ait { font-family:'Orbitron',monospace; font-size:11px; color:var(--saffron); letter-spacing:2px; flex:1; }
-#ai-msgs { flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:7px; max-height:290px; }
-#ai-msgs::-webkit-scrollbar { width:3px; }
-#ai-msgs::-webkit-scrollbar-thumb { background:var(--border-hi); }
-.amsg { padding:7px 10px; font-size:12px; line-height:1.55; max-width:92%; }
-.amsg.u { background:rgba(255,153,51,0.08); border:1px solid rgba(255,153,51,0.25); align-self:flex-end; color:#fff; }
-.amsg.b { background:rgba(19,136,8,0.08); border:1px solid rgba(19,136,8,0.25); align-self:flex-start; color:var(--text); }
-.amsg.ld { color:var(--dim); font-style:italic; }
-.air { padding:8px; border-top:1px solid var(--border); display:flex; gap:6px; }
-#ai-in { flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--border); color:#fff; padding:5px 9px; font-family:'Rajdhani',sans-serif; font-size:12px; outline:none; }
-#ai-in:focus { border-color:var(--border-hi); }
-.asend { padding:5px 12px; background:var(--accent); color:#000; border:none; cursor:pointer; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px; letter-spacing:1px; }
-.asend:hover { background:#ffb74d; }
-#ai-btn { position:absolute; right:295px; bottom:30px; padding:7px 14px; background:rgba(255,153,51,0.12); border:1px solid var(--border-hi); color:var(--accent); font-family:'Orbitron',monospace; font-size:10px; letter-spacing:1.5px; cursor:pointer; z-index:50; display:flex; align-items:center; gap:7px; box-shadow:var(--glow); transition:all .2s; }
-#ai-btn:hover { background:rgba(255,153,51,0.22); }
+/* FEED ITEMS */
+.fi{padding:6px 10px;border-bottom:1px solid rgba(255,153,51,0.06);display:flex;gap:6px;
+  align-items:flex-start;cursor:pointer;transition:background .15s;animation:sli .3s ease;}
+.fi:hover{background:rgba(255,153,51,0.04);}
+@keyframes sli{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.fd{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.fd.h{background:var(--red);box-shadow:0 0 6px var(--red);}
+.fd.m{background:var(--yellow);box-shadow:0 0 6px var(--yellow);}
+.fd.l{background:var(--green);box-shadow:0 0 6px var(--green);}
+.fat{font-size:10px;font-weight:600;color:var(--bright);margin-bottom:1px;line-height:1.3;}
+.fam{font-size:8px;color:var(--dim);font-family:'Share Tech Mono',monospace;}
 
-/* ── ALERT ITEMS ── */
-.ai { padding:7px 12px; border-bottom:1px solid rgba(255,153,51,0.07); display:flex; gap:7px; align-items:flex-start; cursor:pointer; transition:background .2s; animation:sli .3s ease; }
-.ai:hover { background:rgba(255,153,51,0.04); }
-@keyframes sli { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
-.ad { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:4px; }
-.ad.h { background:var(--red); box-shadow:0 0 7px var(--red); }
-.ad.m { background:var(--yellow); box-shadow:0 0 7px var(--yellow); }
-.ad.l { background:var(--a2); box-shadow:0 0 7px var(--a2); }
-.at { font-size:11px; font-weight:600; color:#fff; margin-bottom:2px; }
-.am { font-size:9px; color:var(--dim); font-family:'Share Tech Mono',monospace; }
+/* BAR ROWS */
+.br{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.bl{font-size:9px;width:65px;flex-shrink:0;color:var(--text);letter-spacing:.3px;line-height:1.2;}
+.bt{flex:1;height:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);overflow:hidden;}
+.bf{height:100%;transition:width 1.1s ease;}
+.bf::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07));}
+.bv{font-family:'Share Tech Mono',monospace;font-size:8px;width:42px;text-align:right;flex-shrink:0;}
 
-/* ── PROJECT ITEMS ── */
-.pj { border-bottom:1px solid rgba(255,153,51,0.07); padding:7px 0; }
-.pjn { font-size:11px; font-weight:600; color:#fff; margin-bottom:2px; }
-.pjm { font-size:9px; color:var(--dim); margin-bottom:4px; }
-.pjb { display:flex; align-items:center; gap:7px; }
-.pjt { flex:1; height:5px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); }
-.pjf { height:100%; }
-.pjp { font-family:'Share Tech Mono',monospace; font-size:9px; width:28px; text-align:right; }
-.pjs { font-size:8px; border:1px solid; padding:1px 4px; letter-spacing:.5px; }
+/* RICH PERSON CARD */
+.rc{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.ra{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--saffron),var(--yellow));
+  display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:10px;font-weight:900;color:#000;flex-shrink:0;}
+.rn{font-size:10px;font-weight:600;color:var(--bright);}
+.rw{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--yellow);}
+.ri{font-size:8px;color:var(--dim);}
 
-/* ── CREDITS OVERLAY ── */
-#cred-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:1000; display:none; align-items:center; justify-content:center; }
-#cred-card {
-  background:linear-gradient(135deg,#070d14 0%,#0a1828 50%,#070d14 100%);
-  border:1px solid var(--border-hi); box-shadow:0 0 60px rgba(255,153,51,0.22), inset 0 0 60px rgba(255,153,51,0.03);
-  padding:0; width:520px; max-width:92vw; position:relative; overflow:hidden;
-}
-#cred-card::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='.5' fill='rgba(255,153,51,0.12)'/%3E%3C/svg%3E"); pointer-events:none; }
-.cb-top { padding:28px 28px 0; display:flex; align-items:flex-start; gap:18px; }
-.cb-avatar {
-  width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--saffron),var(--a2));
-  display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:22px; font-weight:900; color:#000; flex-shrink:0;
-  box-shadow:0 0 24px rgba(255,153,51,0.5);
-}
-.cb-info { flex:1; }
-.cb-name { font-family:'Orbitron',monospace; font-size:20px; font-weight:900; color:#fff; letter-spacing:2px; line-height:1.2; margin-bottom:8px; }
-.cb-handle { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--a3); letter-spacing:1px; margin-bottom:4px; }
-.cb-links { display:flex; gap:10px; margin-top:8px; }
-.cb-link { padding:4px 12px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; border-radius:1px; cursor:pointer; text-decoration:none; display:inline-block; transition:all .2s; }
-.cb-link.ig { background:rgba(225,48,108,0.12); border:1px solid rgba(225,48,108,0.4); color:#e1306c; }
-.cb-link.ig:hover { background:rgba(225,48,108,0.25); }
-.cb-link.web { background:rgba(79,195,247,0.12); border:1px solid rgba(79,195,247,0.4); color:var(--a3); }
-.cb-link.web:hover { background:rgba(79,195,247,0.25); }
-.cb-divider { height:1px; background:linear-gradient(90deg,transparent,var(--border-hi),transparent); margin:20px 0; }
-.cb-why { padding:0 28px; }
-.cb-why-title { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:2px; margin-bottom:12px; }
-.cb-reasons { display:flex; flex-direction:column; gap:8px; }
-.cb-reason { display:flex; gap:10px; align-items:flex-start; }
-.cb-num { font-family:'Orbitron',monospace; font-size:11px; color:var(--saffron); font-weight:700; flex-shrink:0; width:20px; }
-.cb-txt { font-size:13px; color:var(--text); line-height:1.5; }
-.cb-bottom { padding:20px 28px 24px; display:flex; justify-content:space-between; align-items:center; }
-.cb-tag { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); letter-spacing:2px; }
-.cb-close { padding:6px 18px; background:rgba(255,153,51,0.12); border:1px solid var(--border-hi); color:var(--accent); font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; cursor:pointer; transition:all .2s; }
-.cb-close:hover { background:rgba(255,153,51,0.25); }
-.cb-bento-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 28px; margin-bottom:4px; }
-.cb-bento { background:rgba(255,153,51,0.04); border:1px solid var(--border); padding:10px 12px; }
-.cb-bl { font-size:9px; color:var(--dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
-.cb-bv { font-family:'Share Tech Mono',monospace; font-size:13px; color:#fff; }
+/* AI PANEL */
+#aip{position:absolute;right:275px;bottom:28px;width:360px;background:rgba(3,7,13,0.99);
+  border:1px solid var(--border2);box-shadow:var(--glow);z-index:80;display:none;flex-direction:column;max-height:400px;}
+.aih{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;background:rgba(255,153,51,0.04);}
+.ait{font-family:'Orbitron',monospace;font-size:10px;color:var(--saffron);letter-spacing:2px;flex:1;}
+#aims{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;max-height:270px;}
+#aims::-webkit-scrollbar{width:2px;}
+.am{padding:6px 9px;font-size:11px;line-height:1.5;max-width:90%;}
+.am.u{background:rgba(255,153,51,0.07);border:1px solid rgba(255,153,51,0.22);align-self:flex-end;color:var(--bright);}
+.am.b{background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.22);align-self:flex-start;color:var(--text);}
+.am.ld{color:var(--dim);font-style:italic;}
+.air{padding:7px;border-top:1px solid var(--border);display:flex;gap:5px;}
+#ain{flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--bright);
+  padding:5px 8px;font-family:'Rajdhani',sans-serif;font-size:11px;outline:none;}
+#ain:focus{border-color:var(--border2);}
+.asb{padding:5px 10px;background:var(--saffron);color:#000;border:none;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;}
+#aibtn{position:absolute;right:275px;bottom:28px;padding:6px 12px;background:rgba(255,153,51,0.1);
+  border:1px solid var(--border2);color:var(--saffron);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1.5px;
+  cursor:pointer;z-index:50;display:flex;align-items:center;gap:6px;box-shadow:var(--glow);transition:all .2s;}
+#aibtn:hover{background:rgba(255,153,51,0.2);}
 
-/* ── GRID LINE OVERLAY ── */
-.gline { stroke:rgba(255,153,51,0.04); stroke-width:.5; }
+/* CREDITS OVERLAY */
+#cov{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:1000;
+  display:none;align-items:center;justify-content:center;}
+#cc{background:linear-gradient(135deg,#06101a 0%,#0a1828 60%,#06101a 100%);
+  border:1px solid var(--border2);box-shadow:0 0 60px rgba(255,153,51,0.2),inset 0 0 60px rgba(255,153,51,0.02);
+  width:500px;max-width:94vw;overflow:hidden;position:relative;}
+.cctop{padding:26px 26px 0;display:flex;align-items:flex-start;gap:16px;}
+.ccav{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--saffron),var(--green));
+  display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:#000;flex-shrink:0;box-shadow:0 0 22px rgba(255,153,51,0.45);}
+.ccname{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;color:#fff;letter-spacing:2px;line-height:1.2;margin-bottom:7px;}
+.cchandle{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--blue);letter-spacing:1px;margin-bottom:6px;}
+.cclinks{display:flex;gap:8px;margin-top:7px;}
+.cclink{padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;}
+.cclink.ig{background:rgba(225,48,108,0.1);border:1px solid rgba(225,48,108,0.4);color:#e1306c;}
+.cclink.ig:hover{background:rgba(225,48,108,0.22);}
+.cclink.web{background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.4);color:var(--blue);}
+.cclink.web:hover{background:rgba(56,189,248,0.22);}
+.ccdiv{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:18px 0;}
+.ccwhy{padding:0 26px;}
+.ccwt{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:2px;margin-bottom:10px;}
+.ccrs{display:flex;flex-direction:column;gap:7px;}
+.ccr{display:flex;gap:8px;align-items:flex-start;}
+.ccnum{font-family:'Orbitron',monospace;font-size:10px;color:var(--saffron);font-weight:700;flex-shrink:0;width:18px;}
+.cctxt{font-size:12px;color:var(--text);line-height:1.5;}
+.ccbot{padding:16px 26px 20px;display:flex;justify-content:space-between;align-items:center;}
+.cctag{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:2px;}
+.ccclose{padding:5px 16px;background:rgba(255,153,51,0.1);border:1px solid var(--border2);color:var(--saffron);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
+.ccclose:hover{background:rgba(255,153,51,0.22);}
+.benrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 26px;margin-bottom:4px;}
+.ben{background:rgba(255,153,51,0.04);border:1px solid var(--border);padding:8px 10px;}
+.benl{font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.benv{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--bright);}
 
-/* ── COMPASS ── */
-.compass { pointer-events:none; }
+/* GRID LINES */
+.gline{stroke:rgba(255,153,51,0.035);stroke-width:.4;}
 
-/* ── Scrollfeed ── */
-#feed-wrap { overflow-y:auto; flex:1; }
-#feed-wrap::-webkit-scrollbar { width:3px; }
-#feed-wrap::-webkit-scrollbar-thumb { background:var(--border-hi); }
+/* AQI CIRCLES (drawn on SVG) */
+.aqi-circ{opacity:.55;mix-blend-mode:screen;}
 
-/* ── RIGHT ── */
-#right-panel { border-left:1px solid var(--border); border-right:none; display:flex; flex-direction:column; overflow:hidden; }
-#right-inner { overflow-y:auto; flex:1; }
-#right-inner::-webkit-scrollbar { width:3px; }
-#right-inner::-webkit-scrollbar-thumb { background:var(--border-hi); }
+/* LOADING SPINNER in section */
+.sec-loading{display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);padding:6px 0;}
+.sec-loading::before{content:'⟳';animation:rspin 1s linear infinite;display:inline-block;}
+
+/* MAP STATUS BANNER */
+#mstat{position:absolute;top:44px;left:50%;transform:translateX(-50%);
+  background:rgba(3,7,13,0.95);border:1px solid var(--border2);padding:5px 14px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--saffron);z-index:25;display:none;}
+
+/* Compass */
+.cmpss{pointer-events:none;}
+
+/* ED case item */
+.edi{padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.edn{font-size:10px;font-weight:600;color:var(--bright);}
+.edm{font-size:8px;color:var(--dim);font-family:'Share Tech Mono',monospace;}
+.eds{display:inline-block;padding:1px 6px;border-radius:1px;font-size:8px;font-family:'Share Tech Mono',monospace;}
+
+/* Scrollbar for rp */
+.rp-tab-content{display:none;}
+.rp-tab-content.on{display:block;}
+
+/* Data age */
+#dage{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);}
 </style>
 </head>
 <body>
 
-<!-- ══ TOPBAR ══ -->
-<div id="topbar">
-  <div class="logo">BHARAT <em>MONITOR</em></div>
-  <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim)">v1.0</span>
-  <div class="vsep"></div>
+<!-- ═══ TOPBAR ═══ -->
+<div id="bar">
+  <div class="logo">BHARAT <b>MONITOR</b></div>
+  <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim)">v2.0</span>
+  <div class="sep"></div>
   <div id="clock">--:--:-- IST</div>
-  <div class="vsep"></div>
-  <div class="pill live"><div class="blink"></div>LIVE</div>
-  <div class="pill warn" id="alert-count-pill"><div class="blink"></div>LOADING</div>
-  <div class="vsep"></div>
-  <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim)">FY 2025–26</span>
-  <div class="spacer"></div>
-  <div id="next-refresh">NEXT REFRESH: --:--</div>
-  <button id="refresh-btn" onclick="refreshAll()">⟳ REFRESH NOW</button>
-  <div class="vsep"></div>
-  <button class="nav-tab active" onclick="switchTab('fiscal',this)">FISCAL</button>
-  <button class="nav-tab" onclick="switchTab('projects',this)">PROJECTS</button>
-  <button class="nav-tab" onclick="switchTab('peace',this)">PEACE</button>
-  <button class="nav-tab" onclick="switchTab('defence',this)">DEFENCE</button>
-  <div class="vsep"></div>
-  <button id="credits-btn" onclick="showCredits()">⬡ BUILDER</button>
+  <div class="sep"></div>
+  <div class="chip live"><div class="dot"></div>LIVE</div>
+  <div class="chip warn" id="alert-chip"><div class="dot"></div>LOADING</div>
+  <div class="chip q" id="qstat">QUEUE: IDLE</div>
+  <div class="sep"></div>
+  <div id="nxt">REFRESH: --:--</div>
+  <button id="rbtn" onclick="triggerRefresh()"><span>⟳</span> REFRESH</button>
+  <div class="sep"></div>
+  <button class="tbtn on" onclick="navTab('overview',this)">OVERVIEW</button>
+  <button class="tbtn" onclick="navTab('fiscal',this)">FISCAL</button>
+  <button class="tbtn" onclick="navTab('intel',this)">INTEL</button>
+  <button class="tbtn" onclick="navTab('social',this)">SOCIAL</button>
+  <button class="tbtn" onclick="navTab('env',this)">ENV</button>
+  <div class="sep"></div>
+  <button id="cdbtn" onclick="showCreds()">⬡ BUILDER</button>
+  <div id="dage"></div>
 </div>
 
-<!-- ══ MAIN ══ -->
-<div id="main">
+<!-- ═══ APP GRID ═══ -->
+<div id="app">
 
-  <!-- ── LEFT PANEL ── -->
-  <div class="panel" id="left-panel">
-    <div class="sec" id="sec-overview">
-      <div class="sec-title">NATIONAL OVERVIEW</div>
-      <div class="sg" id="overview-grid">
-        <div class="sc"><div class="sl">GDP</div><div class="skel" style="width:70%"></div></div>
-        <div class="sc g"><div class="sl">TAX</div><div class="skel" style="width:60%"></div></div>
-        <div class="sc b"><div class="sl">EXPENDITURE</div><div class="skel" style="width:80%"></div></div>
-        <div class="sc r"><div class="sl">DEFICIT</div><div class="skel" style="width:50%"></div></div>
+  <!-- ─── LEFT SIDEBAR ─── -->
+  <div id="sidebar">
+
+    <!-- NATIONAL STATS -->
+    <div class="sb-sec" id="sb-stats">
+      <div class="sb-h">NATIONAL PULSE</div>
+      <div id="natpulse">
+        <div class="sk"></div><div class="sk" style="width:70%"></div>
+        <div class="sk" style="width:85%"></div><div class="sk" style="width:60%"></div>
       </div>
     </div>
 
-    <div class="sec">
-      <div class="sec-title">MAP LAYERS</div>
-      <div id="layer-list">
-        <div class="br" style="margin-bottom:5px;cursor:pointer" onclick="toggleLayer('tax',this)">
-          <div style="width:12px;height:12px;background:rgba(255,153,51,0.8);border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;flex-shrink:0" class="lchk">✓</div>
-          <span style="font-size:11px;font-weight:600">💰 TAX ZONES</span>
+    <!-- MAP LAYERS -->
+    <div class="sb-sec">
+      <div class="sb-h">MAP LAYERS</div>
+      <div id="layer-toggles">
+
+        <div class="lyr" onclick="toggleLayer('tax',this)" data-layer="tax">
+          <div class="lck on" style="border-color:#22c55e;background:#22c55e">✓</div>
+          <span class="lic">💰</span><span class="lnm">TAX ZONES</span>
+          <span class="lct">28</span>
         </div>
-        <div class="br" style="margin-bottom:5px;cursor:pointer" onclick="toggleLayer('projects',this)">
-          <div style="width:12px;height:12px;background:rgba(255,215,0,0.8);border:1px solid #ffd700;display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;flex-shrink:0" class="lchk">✓</div>
-          <span style="font-size:11px;font-weight:600">🏗 MEGA PROJECTS</span>
+
+        <div class="lyr" onclick="toggleLayer('military',this)" data-layer="military">
+          <div class="lck" style="border-color:#f43f5e"></div>
+          <span class="lic">⚔️</span><span class="lnm">MILITARY THREATS</span>
+          <span class="lct" id="lc-military">--</span>
         </div>
-        <div class="br" style="margin-bottom:5px;cursor:pointer" onclick="toggleLayer('alerts',this)">
-          <div style="width:12px;height:12px;background:rgba(255,61,61,0.8);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;flex-shrink:0" class="lchk">✓</div>
-          <span style="font-size:11px;font-weight:600">⚠ ALERT ZONES</span>
+
+        <div class="lyr" onclick="toggleLayer('geo',this)" data-layer="geo">
+          <div class="lck" style="border-color:#fb923c"></div>
+          <span class="lic">🌐</span><span class="lnm">GEO PRESSURE</span>
+          <span class="lct" id="lc-geo">--</span>
         </div>
+
+        <div class="lyr" onclick="toggleLayer('aqi',this)" data-layer="aqi">
+          <div class="lck" style="border-color:#a78bfa"></div>
+          <span class="lic">🌫️</span><span class="lnm">AQI HOTSPOTS</span>
+          <span class="lct" id="lc-aqi">--</span>
+        </div>
+
+        <div class="lyr" onclick="toggleLayer('rivers',this)" data-layer="rivers">
+          <div class="lck" style="border-color:#38bdf8"></div>
+          <span class="lic">🌊</span><span class="lnm">RIVERS + BOD</span>
+          <span class="lct">12</span>
+        </div>
+
+        <div class="lyr" onclick="toggleLayer('water',this)" data-layer="water">
+          <div class="lck" style="border-color:#0ea5e9"></div>
+          <span class="lic">💧</span><span class="lnm">WATER SHORTAGE</span>
+          <span class="lct" id="lc-water">--</span>
+        </div>
+
+        <div class="lyr" onclick="toggleLayer('deforest',this)" data-layer="deforest">
+          <div class="lck" style="border-color:#84cc16"></div>
+          <span class="lic">🌳</span><span class="lnm">DEFORESTATION</span>
+          <span class="lct" id="lc-deforest">--</span>
+        </div>
+
+        <div class="lyr" onclick="toggleLayer('exports',this)" data-layer="exports">
+          <div class="lck" style="border-color:#fbbf24"></div>
+          <span class="lic">📦</span><span class="lnm">EXPORT ZONES</span>
+          <span class="lct" id="lc-exports">--</span>
+        </div>
+
+        <div class="lyr" onclick="toggleLayer('alerts',this)" data-layer="alerts">
+          <div class="lck on" style="border-color:#f43f5e;background:#f43f5e">✓</div>
+          <span class="lic">⚠️</span><span class="lnm">ALERT ZONES</span>
+          <div class="lld" style="background:var(--red)"></div>
+        </div>
+
       </div>
     </div>
 
-    <!-- TAB: FISCAL -->
-    <div class="sec tab-l active" id="tl-fiscal">
-      <div class="sec-title">STATE TAX LEADERS</div>
-      <div id="state-tax-bars"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+    <!-- PEACE INDEX MINI -->
+    <div class="sb-sec">
+      <div class="sb-h">STATE PEACE INDEX</div>
+      <div id="peace-mini"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
     </div>
 
-    <!-- TAB: PROJECTS -->
-    <div class="sec tab-l" id="tl-projects" style="display:none">
-      <div class="sec-title">PROJECT SECTORS</div>
-      <div id="proj-sector-bars"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+    <!-- UNEMPLOYMENT -->
+    <div class="sb-sec">
+      <div class="sb-h">UNEMPLOYMENT / SECTOR</div>
+      <div id="unemp-bars"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
     </div>
 
-    <!-- TAB: PEACE -->
-    <div class="sec tab-l" id="tl-peace" style="display:none">
-      <div class="sec-title">PEACE RANKING</div>
-      <div id="peace-bars-left"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
-    </div>
-
-    <!-- TAB: DEFENCE -->
-    <div class="sec tab-l" id="tl-defence" style="display:none">
-      <div class="sec-title">COMMAND READINESS</div>
-      <div id="defence-bars-left"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
-    </div>
-
-    <div class="sec">
-      <div class="sec-title">SCHEME PROGRESS</div>
-      <div id="scheme-bars"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
-    </div>
   </div>
 
-  <!-- ── CENTER MAP ── -->
-  <div id="map-wrap">
+  <!-- ─── CENTER MAP ─── -->
+  <div id="mc">
     <div id="mhdr">
-      <div class="mt">INDIA — SITUATIONAL AWARENESS</div>
+      <div class="mttl">INDIA — LIVE INTELLIGENCE MAP</div>
       <div style="flex:1"></div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim)" id="hover-info">HOVER OVER STATE</div>
+      <div id="hinfo">HOVER OVER STATE</div>
     </div>
 
-    <!-- INDIA SVG MAP -->
     <svg id="svg-map" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid meet">
       <defs>
-        <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+        <radialGradient id="bg" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="rgba(255,153,51,0.04)"/>
           <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
         </radialGradient>
+        <filter id="blur2"><feGaussianBlur stdDeviation="4"/></filter>
+        <filter id="gf"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
-      <ellipse cx="400" cy="460" rx="360" ry="400" fill="url(#bgGlow)"/>
+      <ellipse cx="400" cy="460" rx="370" ry="410" fill="url(#bg)"/>
       <!-- Grid -->
-      <line x1="0" y1="200" x2="800" y2="200" class="gline"/><line x1="0" y1="400" x2="800" y2="400" class="gline"/>
-      <line x1="0" y1="600" x2="800" y2="600" class="gline"/><line x1="0" y1="800" x2="800" y2="800" class="gline"/>
-      <line x1="200" y1="0" x2="200" y2="900" class="gline"/><line x1="400" y1="0" x2="400" y2="900" class="gline"/>
+      <line x1="0" y1="220" x2="800" y2="220" class="gline"/>
+      <line x1="0" y1="440" x2="800" y2="440" class="gline"/>
+      <line x1="0" y1="660" x2="800" y2="660" class="gline"/>
+      <line x1="0" y1="880" x2="800" y2="880" class="gline"/>
+      <line x1="200" y1="0" x2="200" y2="900" class="gline"/>
+      <line x1="400" y1="0" x2="400" y2="900" class="gline"/>
       <line x1="600" y1="0" x2="600" y2="900" class="gline"/>
 
-      <!-- ─ STATE PATHS ─ -->
-      <path id="st-JK"  class="st" data-state="Jammu & Kashmir"   d="M280,32 L345,20 L402,42 L432,82 L420,132 L380,152 L342,142 L298,122 L268,90 Z"/>
-      <path id="st-HP"  class="st" data-state="Himachal Pradesh"  d="M342,142 L382,152 L402,172 L376,198 L345,192 L320,176 Z"/>
-      <path id="st-PB"  class="st" data-state="Punjab"            d="M268,150 L320,145 L342,162 L322,188 L284,192 L258,175 Z"/>
-      <path id="st-HR"  class="st" data-state="Haryana"           d="M288,192 L325,186 L346,202 L336,232 L294,237 L268,217 Z"/>
-      <path id="st-DL"  class="st" data-state="Delhi"             d="M320,212 L342,206 L356,222 L351,243 L326,247 L311,231 Z"/>
-      <path id="st-UK"  class="st" data-state="Uttarakhand"       d="M352,165 L402,172 L432,192 L412,227 L376,232 L347,216 Z"/>
-      <path id="st-UP"  class="st" data-state="Uttar Pradesh"     d="M294,242 L352,236 L428,232 L492,252 L502,302 L482,352 L422,372 L352,362 L294,332 L268,292 Z"/>
-      <path id="st-RJ"  class="st" data-state="Rajasthan"         d="M198,202 L268,196 L294,242 L268,302 L238,362 L183,382 L143,342 L138,282 L158,222 Z"/>
-      <path id="st-MP"  class="st" data-state="Madhya Pradesh"    d="M243,362 L294,336 L422,366 L462,382 L452,432 L392,452 L298,447 L233,422 Z"/>
-      <path id="st-GJ"  class="st" data-state="Gujarat"           d="M128,332 L188,312 L242,342 L233,422 L198,472 L153,482 L98,452 L83,392 Z"/>
-      <path id="st-MH"  class="st" data-state="Maharashtra"       d="M198,452 L298,447 L397,452 L422,492 L402,552 L352,582 L278,572 L208,542 L168,492 Z"/>
-      <path id="st-BR"  class="st" data-state="Bihar"             d="M482,302 L542,292 L572,322 L557,362 L502,377 L462,357 Z"/>
-      <path id="st-JH"  class="st" data-state="Jharkhand"         d="M492,367 L552,357 L582,387 L567,432 L512,442 L472,417 Z"/>
-      <path id="st-WB"  class="st" data-state="West Bengal"       d="M562,282 L617,267 L642,302 L637,362 L602,412 L562,422 L537,382 Z"/>
-      <path id="st-OD"  class="st" data-state="Odisha"            d="M512,427 L567,417 L602,442 L592,512 L547,537 L492,512 Z"/>
-      <path id="st-CG"  class="st" data-state="Chhattisgarh"      d="M402,452 L482,447 L512,472 L502,542 L452,562 L388,542 Z"/>
-      <path id="st-TG"  class="st" data-state="Telangana"         d="M382,542 L452,537 L492,562 L482,617 L432,637 L372,612 Z"/>
-      <path id="st-AP"  class="st" data-state="Andhra Pradesh"    d="M432,612 L492,592 L542,622 L532,682 L482,712 L422,697 Z"/>
-      <path id="st-KA"  class="st" data-state="Karnataka"         d="M293,557 L382,547 L422,572 L432,637 L397,682 L342,692 L283,662 Z"/>
-      <path id="st-GA"  class="st" data-state="Goa"               d="M248,587 L278,580 L287,602 L267,617 Z"/>
-      <path id="st-KL"  class="st" data-state="Kerala"            d="M293,662 L342,652 L352,712 L327,772 L292,782 Z"/>
-      <path id="st-TN"  class="st" data-state="Tamil Nadu"        d="M367,672 L432,660 L462,702 L442,762 L397,792 L347,777 Z"/>
-      <path id="st-AS"  class="st" data-state="Assam"             d="M642,252 L702,242 L732,262 L722,297 L672,307 Z"/>
-      <path id="st-NE"  class="st" data-state="Northeast States"  d="M698,242 L748,232 L772,257 L762,297 L722,297 Z"/>
+      <!-- ══ STATES ══ -->
+      <path id="st-JK" class="st" data-state="Jammu & Kashmir" d="M278,32 L343,20 L400,42 L430,80 L418,130 L378,150 L340,140 L296,120 L266,88Z"/>
+      <path id="st-HP" class="st" data-state="Himachal Pradesh" d="M340,140 L380,150 L400,170 L374,196 L343,190 L318,174Z"/>
+      <path id="st-PB" class="st" data-state="Punjab" d="M266,148 L318,143 L340,160 L320,186 L282,190 L256,173Z"/>
+      <path id="st-HR" class="st" data-state="Haryana" d="M286,190 L323,184 L344,200 L334,230 L292,235 L266,215Z"/>
+      <path id="st-DL" class="st" data-state="Delhi" d="M318,210 L340,204 L354,220 L349,241 L324,245 L309,229Z"/>
+      <path id="st-UK" class="st" data-state="Uttarakhand" d="M350,163 L400,170 L430,190 L410,225 L374,230 L345,214Z"/>
+      <path id="st-UP" class="st" data-state="Uttar Pradesh" d="M292,240 L350,234 L426,230 L490,250 L500,300 L480,350 L420,370 L350,360 L292,330 L266,290Z"/>
+      <path id="st-RJ" class="st" data-state="Rajasthan" d="M196,200 L266,194 L292,240 L266,300 L236,360 L181,380 L141,340 L136,280 L156,220Z"/>
+      <path id="st-MP" class="st" data-state="Madhya Pradesh" d="M241,360 L292,334 L420,364 L460,380 L450,430 L390,450 L296,445 L231,420Z"/>
+      <path id="st-GJ" class="st" data-state="Gujarat" d="M126,330 L186,310 L240,340 L231,420 L196,470 L151,480 L96,450 L81,390Z"/>
+      <path id="st-MH" class="st" data-state="Maharashtra" d="M196,450 L296,445 L395,450 L420,490 L400,550 L350,580 L276,570 L206,540 L166,490Z"/>
+      <path id="st-BR" class="st" data-state="Bihar" d="M480,300 L540,290 L570,320 L555,360 L500,375 L460,355Z"/>
+      <path id="st-JH" class="st" data-state="Jharkhand" d="M490,365 L550,355 L580,385 L565,430 L510,440 L470,415Z"/>
+      <path id="st-WB" class="st" data-state="West Bengal" d="M560,280 L615,265 L640,300 L635,360 L600,410 L560,420 L535,380Z"/>
+      <path id="st-OD" class="st" data-state="Odisha" d="M510,425 L565,415 L600,440 L590,510 L545,535 L490,510Z"/>
+      <path id="st-CG" class="st" data-state="Chhattisgarh" d="M400,450 L480,445 L510,470 L500,540 L450,560 L386,540Z"/>
+      <path id="st-TG" class="st" data-state="Telangana" d="M380,540 L450,535 L490,560 L480,615 L430,635 L370,610Z"/>
+      <path id="st-AP" class="st" data-state="Andhra Pradesh" d="M430,610 L490,590 L540,620 L530,678 L480,708 L420,693Z"/>
+      <path id="st-KA" class="st" data-state="Karnataka" d="M291,555 L380,545 L420,570 L430,635 L395,678 L340,688 L281,658Z"/>
+      <path id="st-GA" class="st" data-state="Goa" d="M246,585 L276,578 L285,600 L265,615Z"/>
+      <path id="st-KL" class="st" data-state="Kerala" d="M291,658 L340,648 L350,708 L325,770 L290,780Z"/>
+      <path id="st-TN" class="st" data-state="Tamil Nadu" d="M365,668 L430,656 L460,698 L440,758 L395,788 L345,773Z"/>
+      <path id="st-AS" class="st" data-state="Assam" d="M640,250 L700,240 L730,260 L720,295 L670,305Z"/>
+      <path id="st-NE" class="st" data-state="Northeast States" d="M696,240 L746,230 L770,255 L760,295 L720,295Z"/>
+      <path id="st-MN" class="st" data-state="Manipur" d="M720,295 L760,295 L755,330 L720,335Z"/>
+      <path id="st-SK" class="st" data-state="Sikkim" d="M620,240 L640,235 L645,252 L625,255Z"/>
 
-      <!-- ─ CITY DOTS ─ -->
-      <g id="city-layer">
-        <g class="pdot" onclick="onCityClick('Delhi')">
-          <circle class="pring" cx="336" cy="224" r="4" fill="none" stroke="#FF9933" stroke-width="1.5"/>
-          <circle cx="336" cy="224" r="2.5" fill="#FF9933"/>
-          <text x="343" y="222" fill="#FF9933" font-size="8" font-family="'Share Tech Mono',monospace">NEW DELHI</text>
-        </g>
-        <g class="pdot" onclick="onCityClick('Maharashtra')">
-          <circle class="pring" cx="208" cy="502" r="4" fill="none" stroke="#ff4444" stroke-width="1.5"/>
-          <circle cx="208" cy="502" r="2.5" fill="#ff4444"/>
-          <text x="216" y="500" fill="#ff8888" font-size="8" font-family="'Share Tech Mono',monospace">MUMBAI</text>
-        </g>
-        <g class="pdot" onclick="onCityClick('Karnataka')">
-          <circle class="pring" cx="328" cy="627" r="4" fill="none" stroke="#4fc3f7" stroke-width="1.5"/>
-          <circle cx="328" cy="627" r="2.5" fill="#4fc3f7"/>
-          <text x="336" y="625" fill="#4fc3f7" font-size="8" font-family="'Share Tech Mono',monospace">BENGALURU</text>
-        </g>
-        <g class="pdot" onclick="onCityClick('Tamil Nadu')">
-          <circle class="pring" cx="412" cy="692" r="4" fill="none" stroke="#4fc3f7" stroke-width="1.5"/>
-          <circle cx="412" cy="692" r="2.5" fill="#4fc3f7"/>
-          <text x="420" y="690" fill="#4fc3f7" font-size="8" font-family="'Share Tech Mono',monospace">CHENNAI</text>
-        </g>
-        <g class="pdot" onclick="onCityClick('West Bengal')">
-          <circle class="pring" cx="597" cy="342" r="4" fill="none" stroke="#ffd700" stroke-width="1.5"/>
-          <circle cx="597" cy="342" r="2.5" fill="#ffd700"/>
-          <text x="604" y="340" fill="#ffd700" font-size="8" font-family="'Share Tech Mono',monospace">KOLKATA</text>
-        </g>
+      <!-- ══ RIVERS LAYER ══ -->
+      <g id="layer-rivers" style="display:none">
+        <!-- Ganga -->
+        <path class="riv" d="M380,185 Q430,200 480,230 Q510,250 530,280 Q550,305 540,340 Q535,360 560,380 Q590,398 610,380"/>
+        <!-- Yamuna -->
+        <path class="riv" d="M340,162 Q345,200 336,224 Q330,250 340,280 Q350,310 400,330"/>
+        <!-- Brahmaputra -->
+        <path class="riv" d="M660,265 Q690,268 720,265 Q750,260 765,270"/>
+        <!-- Narmada -->
+        <path class="riv" d="M175,420 Q220,415 265,420 Q310,425 355,418 Q390,412 430,420"/>
+        <!-- Krishna -->
+        <path class="riv" d="M280,570 Q330,560 385,555 Q430,548 470,560 Q510,572 540,560"/>
+        <!-- Godavari -->
+        <path class="riv" d="M310,510 Q360,505 410,510 Q460,515 500,505 Q540,495 570,500"/>
+        <!-- Cauvery -->
+        <path class="riv" d="M310,655 Q340,650 370,660 Q400,668 420,660 Q440,650 460,665"/>
+        <!-- Indus -->
+        <path class="riv" d="M290,60 Q295,90 285,120 Q278,145 270,168"/>
+        <!-- POLLUTED rivers (red/brown) -->
+        <path class="riv poll" d="M480,230 Q510,250 530,280 Q550,305 540,340" id="ganga-poll"/>
+        <path class="riv poll" d="M336,224 Q330,250 340,280" id="yamuna-poll"/>
       </g>
 
-      <!-- ─ ALERT PULSE ZONES ─ -->
-      <g id="alert-layer">
-        <circle cx="492" cy="482" r="14" fill="rgba(255,61,61,0.1)" stroke="#ff4444" stroke-width="1" stroke-dasharray="3,3">
-          <animate attributeName="r" values="10;18;10" dur="3s" repeatCount="indefinite"/>
+      <!-- ══ AQI LAYER ══ -->
+      <g id="layer-aqi" style="display:none">
+        <!-- Delhi - Severe -->
+        <circle class="aqi-circ" cx="333" cy="224" r="38" fill="rgba(139,0,0,0.35)" id="aq-delhi"/>
+        <!-- Mumbai - Moderate -->
+        <circle class="aqi-circ" cx="186" cy="502" r="28" fill="rgba(255,140,0,0.28)" id="aq-mumbai"/>
+        <!-- Kolkata - Poor -->
+        <circle class="aqi-circ" cx="597" cy="342" r="30" fill="rgba(139,0,0,0.28)" id="aq-kolkata"/>
+        <!-- Patna - Severe -->
+        <circle class="aqi-circ" cx="502" cy="320" r="24" fill="rgba(139,0,0,0.32)" id="aq-patna"/>
+        <!-- Lucknow - Poor -->
+        <circle class="aqi-circ" cx="415" cy="285" r="22" fill="rgba(180,0,0,0.25)" id="aq-lucknow"/>
+        <!-- Bangalore - Good -->
+        <circle class="aqi-circ" cx="328" cy="627" r="20" fill="rgba(0,128,0,0.18)" id="aq-blr"/>
+        <!-- Chennai - Moderate -->
+        <circle class="aqi-circ" cx="412" cy="692" r="22" fill="rgba(255,165,0,0.22)" id="aq-chennai"/>
+        <!-- Kanpur - Severe -->
+        <circle class="aqi-circ" cx="430" cy="295" r="20" fill="rgba(139,0,0,0.30)" id="aq-kanpur"/>
+      </g>
+
+      <!-- ══ WATER SHORTAGE LAYER ══ -->
+      <g id="layer-water" style="display:none">
+        <!-- Rajasthan -->
+        <ellipse cx="210" cy="290" rx="55" ry="65" fill="rgba(255,200,50,0.12)" stroke="#fbbf24" stroke-width=".8" stroke-dasharray="4,3"/>
+        <!-- Marathwada (MH) -->
+        <ellipse cx="330" cy="490" rx="40" ry="35" fill="rgba(255,200,50,0.10)" stroke="#fbbf24" stroke-width=".8" stroke-dasharray="4,3"/>
+        <!-- Bundelkhand (UP/MP) -->
+        <ellipse cx="368" cy="340" rx="35" ry="30" fill="rgba(255,200,50,0.10)" stroke="#fbbf24" stroke-width=".8" stroke-dasharray="4,3"/>
+        <!-- Gujarat dry -->
+        <ellipse cx="155" cy="405" rx="35" ry="40" fill="rgba(255,200,50,0.08)" stroke="#fbbf24" stroke-width=".8" stroke-dasharray="4,3"/>
+        <!-- Vidarbha -->
+        <ellipse cx="420" cy="470" rx="28" ry="22" fill="rgba(255,200,50,0.09)" stroke="#fbbf24" stroke-width=".8" stroke-dasharray="4,3"/>
+      </g>
+
+      <!-- ══ DEFORESTATION LAYER ══ -->
+      <g id="layer-deforest" style="display:none">
+        <!-- Northeast (heavy logging) -->
+        <ellipse cx="700" cy="265" rx="42" ry="35" fill="rgba(139,90,0,0.15)" stroke="#a16207" stroke-width=".8" stroke-dasharray="3,3"/>
+        <!-- Madhya Pradesh (mining) -->
+        <ellipse cx="340" cy="395" rx="50" ry="38" fill="rgba(139,90,0,0.12)" stroke="#a16207" stroke-width=".8" stroke-dasharray="3,3"/>
+        <!-- Chhattisgarh (coal) -->
+        <ellipse cx="455" cy="500" rx="38" ry="42" fill="rgba(139,90,0,0.13)" stroke="#a16207" stroke-width=".8" stroke-dasharray="3,3"/>
+        <!-- Odisha (mining) -->
+        <ellipse cx="548" cy="475" rx="32" ry="30" fill="rgba(139,90,0,0.12)" stroke="#a16207" stroke-width=".8" stroke-dasharray="3,3"/>
+        <!-- Western Ghats -->
+        <ellipse cx="263" cy="610" rx="20" ry="60" fill="rgba(139,90,0,0.10)" stroke="#a16207" stroke-width=".8" stroke-dasharray="3,3"/>
+      </g>
+
+      <!-- ══ MILITARY THREATS LAYER ══ -->
+      <g id="layer-military" style="display:none" filter="url(#gf)">
+        <!-- Pakistan border tension -->
+        <polygon points="240,125 248,140 232,140" fill="var(--red)" opacity=".9"/>
+        <circle cx="240" cy="122" r="14" fill="rgba(244,63,94,0.12)" stroke="var(--red)" stroke-width=".8" stroke-dasharray="3,3">
+          <animate attributeName="r" values="10;18;10" dur="2.5s" repeatCount="indefinite"/>
         </circle>
-        <circle cx="240" cy="142" r="10" fill="rgba(255,153,51,0.1)" stroke="#FF9933" stroke-width="1" stroke-dasharray="3,3">
-          <animate attributeName="r" values="7;14;7" dur="2.2s" repeatCount="indefinite"/>
+        <!-- China (LAC) -->
+        <polygon points="480,85 488,100 472,100" fill="#fb923c" opacity=".9"/>
+        <circle cx="480" cy="82" r="13" fill="rgba(251,146,60,0.12)" stroke="#fb923c" stroke-width=".8" stroke-dasharray="3,3">
+          <animate attributeName="r" values="9;16;9" dur="3s" repeatCount="indefinite"/>
         </circle>
-        <circle cx="722" cy="268" r="10" fill="rgba(255,153,51,0.1)" stroke="#FF9933" stroke-width="1" stroke-dasharray="3,3">
-          <animate attributeName="r" values="7;13;7" dur="2.5s" repeatCount="indefinite"/>
+        <!-- NE insurgency -->
+        <polygon points="730,258 738,273 722,273" fill="var(--yellow)" opacity=".9"/>
+        <circle cx="730" cy="255" r="11" fill="rgba(251,191,36,0.10)" stroke="var(--yellow)" stroke-width=".8" stroke-dasharray="3,3">
+          <animate attributeName="r" values="8;14;8" dur="2.8s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Naxal belt -->
+        <polygon points="463,492 471,507 455,507" fill="var(--red)" opacity=".8"/>
+        <circle cx="463" cy="489" r="16" fill="rgba(244,63,94,0.10)" stroke="var(--red)" stroke-width=".8" stroke-dasharray="3,3">
+          <animate attributeName="r" values="12;22;12" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Labels -->
+        <text x="248" y="120" fill="var(--red)" font-size="7" font-family="'Share Tech Mono',monospace">LOC TENSION</text>
+        <text x="488" y="80" fill="#fb923c" font-size="7" font-family="'Share Tech Mono',monospace">LAC DISPUTED</text>
+        <text x="738" y="253" fill="var(--yellow)" font-size="7" font-family="'Share Tech Mono',monospace">INSURGENCY</text>
+        <text x="472" y="487" fill="var(--red)" font-size="7" font-family="'Share Tech Mono',monospace">NAXAL ZONE</text>
+      </g>
+
+      <!-- ══ GEO PRESSURE LAYER ══ -->
+      <g id="layer-geo" style="display:none">
+        <!-- Sri Lanka maritime -->
+        <circle cx="420" cy="810" r="14" fill="rgba(251,146,60,0.12)" stroke="#fb923c" stroke-width=".8" stroke-dasharray="2,2"/>
+        <text x="395" y="830" fill="#fb923c" font-size="7" font-family="'Share Tech Mono',monospace">INDIAN OCEAN</text>
+        <!-- China influence Bay of Bengal -->
+        <circle cx="640" cy="480" r="18" fill="rgba(251,146,60,0.10)" stroke="#fb923c" stroke-width=".8" stroke-dasharray="2,2"/>
+        <text x="620" y="500" fill="#fb923c" font-size="7" font-family="'Share Tech Mono',monospace">BAY OF BENGAL</text>
+        <!-- Pakistan diplomatic -->
+        <circle cx="165" cy="165" r="16" fill="rgba(248,113,113,0.10)" stroke="var(--red)" stroke-width=".8" stroke-dasharray="2,2"/>
+        <!-- Nepal -->
+        <circle cx="460" cy="185" r="12" fill="rgba(251,146,60,0.10)" stroke="#fb923c" stroke-width=".8" stroke-dasharray="2,2"/>
+        <text x="440" y="178" fill="#fb923c" font-size="7" font-family="'Share Tech Mono',monospace">NEPAL BORDER</text>
+        <!-- Bangladesh -->
+        <circle cx="630" cy="330" r="12" fill="rgba(251,191,36,0.10)" stroke="var(--yellow)" stroke-width=".8" stroke-dasharray="2,2"/>
+        <text x="610" y="322" fill="var(--yellow)" font-size="7" font-family="'Share Tech Mono',monospace">BGDSH</text>
+      </g>
+
+      <!-- ══ EXPORTS LAYER ══ -->
+      <g id="layer-exports" style="display:none">
+        <!-- Mumbai Port -->
+        <rect x="197" y="496" width="8" height="8" fill="var(--yellow)" opacity=".9"/>
+        <text x="207" y="504" fill="var(--yellow)" font-size="7" font-family="'Share Tech Mono',monospace">NHAVA SHEVA</text>
+        <!-- Mundra Port -->
+        <rect x="110" y="444" width="8" height="8" fill="var(--yellow)" opacity=".9"/>
+        <text x="120" y="452" fill="var(--yellow)" font-size="7" font-family="'Share Tech Mono',monospace">MUNDRA PORT</text>
+        <!-- Chennai Port -->
+        <rect x="420" y="690" width="8" height="8" fill="var(--yellow)" opacity=".9"/>
+        <text x="430" y="698" fill="var(--yellow)" font-size="7" font-family="'Share Tech Mono',monospace">CHENNAI PORT</text>
+        <!-- Bangalore IT -->
+        <rect x="322" y="622" width="8" height="8" fill="#4ade80" opacity=".9"/>
+        <text x="332" y="630" fill="#4ade80" font-size="7" font-family="'Share Tech Mono',monospace">IT EXPORTS</text>
+        <!-- Surat Textiles -->
+        <rect x="150" y="398" width="8" height="8" fill="#fb923c" opacity=".9"/>
+        <text x="160" y="406" fill="#fb923c" font-size="7" font-family="'Share Tech Mono',monospace">TEXTILES</text>
+        <!-- Ludhiana -->
+        <rect x="285" y="165" width="8" height="8" fill="#a78bfa" opacity=".9"/>
+        <text x="295" y="173" fill="#a78bfa" font-size="7" font-family="'Share Tech Mono',monospace">MFGRING</text>
+        <!-- Vishakhapatnam -->
+        <rect x="550" y="555" width="8" height="8" fill="var(--yellow)" opacity=".9"/>
+        <text x="560" y="563" fill="var(--yellow)" font-size="7" font-family="'Share Tech Mono',monospace">VIZAG PORT</text>
+      </g>
+
+      <!-- ══ ALERTS LAYER ══ -->
+      <g id="layer-alerts">
+        <!-- Naxal region -->
+        <circle cx="463" cy="489" r="16" fill="rgba(244,63,94,0.10)" stroke="var(--red)" stroke-width=".7" stroke-dasharray="3,3">
+          <animate attributeName="r" values="12;22;12" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <!-- J&K -->
+        <circle cx="300" cy="90" r="12" fill="rgba(251,191,36,0.10)" stroke="var(--yellow)" stroke-width=".7" stroke-dasharray="3,3">
+          <animate attributeName="r" values="8;16;8" dur="2.2s" repeatCount="indefinite"/>
+        </circle>
+        <!-- NE -->
+        <circle cx="730" cy="270" r="10" fill="rgba(251,191,36,0.10)" stroke="var(--yellow)" stroke-width=".7" stroke-dasharray="3,3">
+          <animate attributeName="r" values="7;14;7" dur="2.8s" repeatCount="indefinite"/>
         </circle>
       </g>
 
-      <!-- ─ PROJECT MARKERS ─ -->
-      <g id="project-layer">
-        <rect x="168" y="464" width="7" height="7" fill="#ffd700" opacity=".85"/>
-        <rect x="330" y="214" width="6" height="6" fill="#4fc3f7" opacity=".85"/>
-        <rect x="322" y="619" width="6" height="6" fill="#4caf50" opacity=".85"/>
-        <rect x="158" y="422" width="6" height="6" fill="#ffd700" opacity=".85"/>
+      <!-- ══ CITY DOTS ══ -->
+      <g id="cities">
+        <g class="mk" onclick="clickState('Delhi')">
+          <circle class="pulse-ring" cx="333" cy="224" r="5" fill="none" stroke="var(--saffron)" stroke-width="1.3"/>
+          <circle cx="333" cy="224" r="2.5" fill="var(--saffron)"/>
+          <text x="339" y="222" fill="var(--saffron)" font-size="7" font-family="'Share Tech Mono',monospace">NEW DELHI</text>
+        </g>
+        <g class="mk" onclick="clickState('Maharashtra')">
+          <circle class="pulse-ring" cx="186" cy="502" r="5" fill="none" stroke="var(--red)" stroke-width="1.3"/>
+          <circle cx="186" cy="502" r="2.5" fill="var(--red)"/>
+          <text x="194" y="500" fill="#fb7185" font-size="7" font-family="'Share Tech Mono',monospace">MUMBAI</text>
+        </g>
+        <g class="mk" onclick="clickState('Karnataka')">
+          <circle class="pulse-ring" cx="328" cy="627" r="5" fill="none" stroke="var(--blue)" stroke-width="1.3"/>
+          <circle cx="328" cy="627" r="2.5" fill="var(--blue)"/>
+          <text x="336" y="625" fill="var(--blue)" font-size="7" font-family="'Share Tech Mono',monospace">BENGALURU</text>
+        </g>
+        <g class="mk" onclick="clickState('Tamil Nadu')">
+          <circle class="pulse-ring" cx="412" cy="692" r="5" fill="none" stroke="var(--blue)" stroke-width="1.3"/>
+          <circle cx="412" cy="692" r="2.5" fill="var(--blue)"/>
+          <text x="420" y="690" fill="var(--blue)" font-size="7" font-family="'Share Tech Mono',monospace">CHENNAI</text>
+        </g>
+        <g class="mk" onclick="clickState('West Bengal')">
+          <circle class="pulse-ring" cx="597" cy="342" r="5" fill="none" stroke="var(--yellow)" stroke-width="1.3"/>
+          <circle cx="597" cy="342" r="2.5" fill="var(--yellow)"/>
+          <text x="604" y="340" fill="var(--yellow)" font-size="7" font-family="'Share Tech Mono',monospace">KOLKATA</text>
+        </g>
+        <g class="mk" onclick="clickState('Telangana')">
+          <circle cx="425" cy="578" r="2.5" fill="var(--teal)"/>
+          <text x="432" y="576" fill="var(--teal)" font-size="7" font-family="'Share Tech Mono',monospace">HYDERABAD</text>
+        </g>
+        <g class="mk" onclick="clickState('Gujarat')">
+          <circle cx="160" cy="388" r="2.5" fill="var(--saffron)"/>
+          <text x="168" y="386" fill="var(--saffron)" font-size="7" font-family="'Share Tech Mono',monospace">AHMEDABAD</text>
+        </g>
       </g>
 
-      <!-- ─ COMPASS ─ -->
-      <g transform="translate(748,78)" class="compass">
-        <circle r="22" fill="rgba(4,8,13,0.85)" stroke="rgba(255,153,51,0.28)" stroke-width="1"/>
-        <text y="-10" fill="#FF9933" font-size="9" text-anchor="middle" font-family="'Share Tech Mono',monospace">N</text>
-        <polygon points="0,-16 3.5,0 0,5 -3.5,0" fill="#FF9933" opacity=".9"/>
-        <polygon points="0,16 3.5,0 0,-5 -3.5,0" fill="#333" opacity=".7"/>
+      <!-- Compass -->
+      <g transform="translate(750,78)" class="cmpss">
+        <circle r="20" fill="rgba(3,7,13,0.88)" stroke="rgba(255,153,51,0.25)" stroke-width=".8"/>
+        <text y="-9" fill="var(--saffron)" font-size="8" text-anchor="middle" font-family="'Share Tech Mono',monospace">N</text>
+        <polygon points="0,-13 3,0 0,4 -3,0" fill="var(--saffron)" opacity=".9"/>
+        <polygon points="0,13 3,0 0,-4 -3,0" fill="#333" opacity=".7"/>
       </g>
 
-      <!-- Scale -->
-      <g transform="translate(48,862)">
-        <line x1="0" y1="0" x2="76" y2="0" stroke="rgba(255,153,51,0.45)" stroke-width="1.5"/>
-        <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(255,153,51,0.45)" stroke-width="1.5"/>
-        <line x1="76" y1="-4" x2="76" y2="4" stroke="rgba(255,153,51,0.45)" stroke-width="1.5"/>
-        <text x="38" y="-7" fill="rgba(255,153,51,0.5)" font-size="7" text-anchor="middle" font-family="'Share Tech Mono',monospace">500 KM</text>
+      <!-- Scale bar -->
+      <g transform="translate(46,864)">
+        <line x1="0" y1="0" x2="72" y2="0" stroke="rgba(255,153,51,0.4)" stroke-width="1.3"/>
+        <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(255,153,51,0.4)" stroke-width="1.3"/>
+        <line x1="72" y1="-4" x2="72" y2="4" stroke="rgba(255,153,51,0.4)" stroke-width="1.3"/>
+        <text x="36" y="-6" fill="rgba(255,153,51,0.45)" font-size="7" text-anchor="middle" font-family="'Share Tech Mono',monospace">500 KM</text>
       </g>
     </svg>
 
     <!-- Tooltip -->
     <div id="tt"></div>
-
     <!-- State popup -->
     <div id="spop">
       <div class="pc" onclick="closePopup()">✕</div>
-      <div class="pt" id="spop-name"></div>
+      <div class="pt" id="spop-name">—</div>
       <div class="pg" id="spop-grid"></div>
+      <div class="pi-bar" style="margin-top:8px"><div class="pi-fill" id="pi-fill" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:3px">
+        <span style="font-size:8px;color:var(--dim);font-family:'Share Tech Mono',monospace">PEACE INDEX</span>
+        <span style="font-size:8px;color:var(--bright);font-family:'Share Tech Mono',monospace" id="pi-val">--/100</span>
+      </div>
     </div>
-
-    <!-- Map status banner -->
-    <div id="map-status">⟳ FETCHING LIVE DATA...</div>
-
+    <!-- Banner -->
+    <div id="mstat"></div>
     <!-- Legend -->
     <div id="mleg">
-      <span style="color:var(--dim);font-size:9px;margin-right:3px">LEGEND</span>
-      <div class="li"><div class="ld" style="background:var(--red)"></div>HIGH ALERT</div>
-      <div class="li"><div class="ld" style="background:var(--saffron)"></div>ELEVATED</div>
-      <div class="li"><div class="ld" style="background:var(--yellow);border-radius:0"></div>MEGA PROJECT</div>
-      <div class="li"><div class="ld" style="background:var(--a3)"></div>TECH HUB</div>
+      <span style="color:var(--dim);font-size:8px;margin-right:3px">LEGEND</span>
+      <div class="li"><div class="ld" style="background:var(--red)"></div>THREAT</div>
+      <div class="li"><div class="ld" style="background:var(--saffron)"></div>FISCAL</div>
+      <div class="li"><div class="ld" style="background:var(--yellow);border-radius:0" class="sq"></div>EXPORT</div>
+      <div class="li"><div class="ld" style="background:#1e4d7a"></div>RIVER</div>
+      <div class="li"><div class="ld" style="background:#5c3317"></div>RIVER POLL</div>
+      <div class="li"><div class="ld" style="background:rgba(139,0,0,0.6)"></div>AQI POOR</div>
+      <div class="li"><div class="ld" style="background:rgba(139,90,0,0.7)"></div>DEFOREST</div>
+      <div class="li"><div class="ld" style="background:#fbbf24;opacity:.6"></div>WATER STRESS</div>
     </div>
-
     <!-- Bottom bar -->
     <div id="bbar">
-      <span id="coords" class="">28.61°N 77.21°E</span>
+      <span id="coords">28.61°N 77.21°E</span>
       <span>|</span>
       <span id="sel-state">NO STATE SELECTED</span>
       <span style="flex:1"></span>
-      <span id="data-age" style="color:var(--dim)">DATA: LOADING</span>
+      <span id="dage2" style="color:var(--dim)">--</span>
     </div>
-
     <!-- Ticker -->
     <div id="ticker">
-      <div class="tlbl">LIVE</div>
-      <div id="tk">LOADING LIVE DATA FROM AI...</div>
+      <div class="tklbl">LIVE</div>
+      <div id="tk">BHARAT MONITOR — LOADING LIVE INTELLIGENCE...</div>
     </div>
-
-    <!-- AI Button -->
-    <button id="ai-btn" onclick="toggleAI()">🤖 BHARAT AI ANALYST</button>
-
+    <!-- AI button -->
+    <button id="aibtn" onclick="toggleAI()">🤖 BHARAT AI</button>
     <!-- AI Panel -->
-    <div id="ai-wrap">
+    <div id="aip">
       <div class="aih">
         <span>🤖</span>
         <div class="ait">BHARAT AI ANALYST</div>
-        <span onclick="toggleAI()" style="cursor:pointer;color:var(--dim);font-size:13px">✕</span>
+        <span onclick="toggleAI()" style="cursor:pointer;color:var(--dim)">✕</span>
       </div>
-      <div id="ai-msgs">
-        <div class="amsg b">Namaste! I am your Bharat Intelligence Analyst powered by live AI. Ask me about India's budget, state taxes, mega projects, defence, or current affairs.</div>
+      <div id="aims">
+        <div class="am b">Namaste! I'm your live India Intelligence Analyst. Ask me about state budgets, military threats, AQI, ED cases, corruption, rivers, exports — anything about India's governance.</div>
       </div>
       <div class="air">
-        <input id="ai-in" placeholder="Ask about India's governance..." onkeydown="if(event.key==='Enter')sendAI()"/>
-        <button class="asend" onclick="sendAI()">SEND</button>
+        <input id="ain" placeholder="Ask anything about India..." onkeydown="if(event.key==='Enter')sendAI()"/>
+        <button class="asb" onclick="sendAI()">ASK</button>
       </div>
     </div>
   </div>
 
-  <!-- ── RIGHT PANEL ── -->
-  <div id="right-panel">
-    <div class="sec">
-      <div class="sec-title">INTELLIGENCE FEED</div>
+  <!-- ─── RIGHT PANEL ─── -->
+  <div id="rp">
+    <div class="rp-tabs">
+      <button class="rptb on" onclick="rpTab('feed',this)">FEED</button>
+      <button class="rptb" onclick="rpTab('rich',this)">RICH</button>
+      <button class="rptb" onclick="rpTab('ed',this)">ED</button>
+      <button class="rptb" onclick="rpTab('rivers',this)">RIVERS</button>
+      <button class="rptb" onclick="rpTab('births',this)">VITALS</button>
     </div>
-    <div id="feed-wrap">
-      <div class="ai"><div class="ad m"></div><div><div class="at">Loading live intelligence...</div><div class="am">FETCHING FROM AI</div></div></div>
-    </div>
+    <div id="rp-body">
 
-    <div id="right-inner">
-      <!-- TAB: FISCAL -->
-      <div class="tab-r active" id="tr-fiscal">
-        <div class="sec">
-          <div class="sec-title">EXPENDITURE SECTORS</div>
-          <div id="exp-bars"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      <!-- FEED TAB -->
+      <div class="rp-tab-content on" id="rpt-feed">
+        <div class="rp-sec">
+          <div class="rp-h">INTEL FEED</div>
+          <div id="alert-feed"><div class="sec-loading">FETCHING LIVE ALERTS</div></div>
         </div>
-        <div class="sec">
-          <div class="sec-title">GST MONTHLY TREND</div>
-          <canvas id="gst-canvas" height="72" style="width:100%"></canvas>
+        <div class="rp-sec">
+          <div class="rp-h">TOP CORRUPT POLITICIANS</div>
+          <div id="corrupt-list"><div class="sec-loading">LOADING</div></div>
+        </div>
+        <div class="rp-sec">
+          <div class="rp-h">EXPENDITURE</div>
+          <div id="exp-bars"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
         </div>
       </div>
 
-      <!-- TAB: PROJECTS -->
-      <div class="tab-r" id="tr-projects" style="display:none">
-        <div class="sec">
-          <div class="sec-title">ACTIVE MEGA PROJECTS</div>
-          <div id="proj-list"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      <!-- RICHEST INDIANS TAB -->
+      <div class="rp-tab-content" id="rpt-rich">
+        <div class="rp-sec">
+          <div class="rp-h">TOP BILLIONAIRES</div>
+          <div id="rich-list"><div class="sec-loading">FETCHING WEALTH DATA</div></div>
+        </div>
+        <div class="rp-sec">
+          <div class="rp-h">WEALTH BY STATE</div>
+          <div id="wealth-bars"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
         </div>
       </div>
 
-      <!-- TAB: PEACE -->
-      <div class="tab-r" id="tr-peace" style="display:none">
-        <div class="sec">
-          <div class="sec-title">PEACE METRICS</div>
-          <div id="peace-metrics"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      <!-- ED CASES TAB -->
+      <div class="rp-tab-content" id="rpt-ed">
+        <div class="rp-sec">
+          <div class="rp-h">TOP ED / CBI CASES</div>
+          <div id="ed-list"><div class="sec-loading">LOADING LIVE CASES</div></div>
         </div>
       </div>
 
-      <!-- TAB: DEFENCE -->
-      <div class="tab-r" id="tr-defence" style="display:none">
-        <div class="sec">
-          <div class="sec-title">DEFENCE OVERVIEW</div>
-          <div id="def-metrics"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      <!-- RIVERS TAB -->
+      <div class="rp-tab-content" id="rpt-rivers">
+        <div class="rp-sec">
+          <div class="rp-h">RIVER POLLUTION (BOD)</div>
+          <div id="river-list"><div class="sec-loading">FETCHING RIVER DATA</div></div>
+        </div>
+        <div class="rp-sec">
+          <div class="rp-h">BOD LEVELS (mg/L)</div>
+          <div id="bod-bars"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
         </div>
       </div>
+
+      <!-- VITALS TAB -->
+      <div class="rp-tab-content" id="rpt-births">
+        <div class="rp-sec">
+          <div class="rp-h">BIRTHS & DEATHS</div>
+          <div id="vitals-list"><div class="sec-loading">LOADING</div></div>
+        </div>
+        <div class="rp-sec">
+          <div class="rp-h">AQI BY CITY</div>
+          <div id="aqi-bars"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
-<!-- ══ CREDITS OVERLAY ══ -->
-<div id="cred-overlay" onclick="if(event.target===this)hideCredits()">
-  <div id="cred-card">
-    <div class="cb-top">
-      <div class="cb-avatar">N</div>
-      <div class="cb-info">
-        <div class="cb-name">NIKSHEP<br>DOGGALLI</div>
-        <div class="cb-handle">// BUILDER & ARCHITECT</div>
-        <div class="cb-links">
-          <a class="cb-link ig" href="https://instagram.com/nikkk.exe" target="_blank">📸 @nikkk.exe</a>
-          <a class="cb-link web" href="https://nikshep.vercel.app" target="_blank">🌐 nikshep.vercel.app</a>
+<!-- ═══ CREDITS OVERLAY ═══ -->
+<div id="cov" onclick="if(event.target===this)hideCreds()">
+  <div id="cc">
+    <div class="cctop">
+      <div class="ccav">N</div>
+      <div>
+        <div class="ccname">NIKSHEP<br>DOGGALLI</div>
+        <div class="cchandle">// BUILDER & ARCHITECT — BHARAT MONITOR</div>
+        <div class="cclinks">
+          <a class="cclink ig" href="https://instagram.com/nikkk.exe" target="_blank">📸 instagram.com/nikkk.exe</a>
+          <a class="cclink web" href="https://nikshep.vercel.app" target="_blank">🌐 nikshep.vercel.app</a>
         </div>
       </div>
     </div>
-
-    <div class="cb-divider"></div>
-
-    <div class="cb-bento-row">
-      <div class="cb-bento">
-        <div class="cb-bl">INSTAGRAM</div>
-        <div class="cb-bv" style="color:#e1306c">instagram.com/nikkk.exe</div>
-      </div>
-      <div class="cb-bento">
-        <div class="cb-bl">PORTFOLIO</div>
-        <div class="cb-bv" style="color:var(--a3)">nikshep.vercel.app</div>
+    <div class="ccdiv"></div>
+    <div class="benrow">
+      <div class="ben"><div class="benl">INSTAGRAM</div><div class="benv" style="color:#e1306c">@nikkk.exe</div></div>
+      <div class="ben"><div class="benl">PORTFOLIO</div><div class="benv" style="color:var(--blue)">nikshep.vercel.app</div></div>
+    </div>
+    <div class="ccwhy" style="margin-top:14px">
+      <div class="ccwt">// WHY I BUILT BHARAT MONITOR</div>
+      <div class="ccrs">
+        <div class="ccr"><div class="ccnum">01</div><div class="cctxt">India's governance data is scattered across 50+ portals. I wanted a single military-grade situational-awareness interface that unifies fiscal, defence, peace, environment, and social intelligence in real time.</div></div>
+        <div class="ccr"><div class="ccnum">02</div><div class="cctxt">Most dashboards serve stale numbers. I built a live AI backbone — every metric is freshly reasoned from the web, not hardcoded six months ago in a CSV file.</div></div>
+        <div class="ccr"><div class="ccnum">03</div><div class="cctxt">As an Indian builder, I believe every citizen deserves a transparent, military-grade view of their own country — its rivers, air, money, corruption and borders.</div></div>
+        <div class="ccr"><div class="ccnum">04</div><div class="cctxt">Inspired by worldmonitor.app, I proved the same intelligence-dashboard concept could be built for India's uniquely complex 28-state federal structure and $3.9T economy.</div></div>
+        <div class="ccr"><div class="ccnum">05</div><div class="cctxt">This is open civic tech — a statement that powerful geopolitical tools shouldn't be locked behind enterprise paywalls. Bharat Monitor is free, open, and built for Bharat.</div></div>
       </div>
     </div>
-
-    <div class="cb-why" style="margin-top:14px">
-      <div class="cb-why-title">// WHY I BUILT BHARAT MONITOR</div>
-      <div class="cb-reasons">
-        <div class="cb-reason">
-          <div class="cb-num">01</div>
-          <div class="cb-txt">India's governance data is scattered across 50+ portals — I wanted a single DEFCON-style interface that unifies fiscal, defence, peace, and project intelligence in real time.</div>
-        </div>
-        <div class="cb-reason">
-          <div class="cb-num">02</div>
-          <div class="cb-txt">Most dashboards show stale numbers; I built this with a live AI backbone so every metric you see is freshly reasoned from the latest available data, not hardcoded six months ago.</div>
-        </div>
-        <div class="cb-reason">
-          <div class="cb-num">03</div>
-          <div class="cb-txt">As an Indian builder, I believe citizens deserve a military-grade situational awareness layer for their own country — transparent, open, and beautiful.</div>
-        </div>
-        <div class="cb-reason">
-          <div class="cb-num">04</div>
-          <div class="cb-txt">Inspired by worldmonitor.app, I wanted to prove the same intelligence-dashboard concept could be built specifically for India's complex federal structure and 28-state economy.</div>
-        </div>
-        <div class="cb-reason">
-          <div class="cb-num">05</div>
-          <div class="cb-txt">This is open civic tech — a statement that powerful geopolitical tools shouldn't be locked behind enterprise paywalls. Bharat Monitor is free, forever.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="cb-bottom">
-      <div class="cb-tag">BHARAT MONITOR v1.0 • OPEN CIVIC TECH</div>
-      <button class="cb-close" onclick="hideCredits()">CLOSE ✕</button>
+    <div class="ccbot">
+      <div class="cctag">BHARAT MONITOR v2.0 • OPEN CIVIC TECH • BUILT WITH ❤️ FOR INDIA</div>
+      <button class="ccclose" onclick="hideCreds()">CLOSE ✕</button>
     </div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-//  CONSTANTS
-// ══════════════════════════════════════════════
-const OR_KEY = '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';
-const OR_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL  = 'anthropic/claude-sonnet-4-5';
-const REFRESH_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+// ══════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════
+const KEY   = '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';
+const URL   = 'https://openrouter.ai/api/v1/chat/completions';
+const MODEL = 'anthropic/claude-sonnet-4-5';
+const REFRESH_INTERVAL = 60 * 60 * 1000; // 1 hour
 
-let nextRefreshTime = null;
-let refreshTimer    = null;
-let currentTab      = 'fiscal';
-let liveData        = {};
+let cache          = {};       // key → data
+let layerData      = {};       // layer data from API
+let nextRefresh    = null;
+let refreshTimeout = null;
+let currentNavTab  = 'overview';
+let currentRpTab   = 'feed';
+let queueBusy      = false;
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+//  API QUEUE — serial, 400ms gap, no rate-limit hammering
+// ══════════════════════════════════════════════════════════
+const Q = [];
+let qRunning = false;
+
+function enqueue(key, sysprompt, userprompt, tokens, onDone) {
+  if (cache[key]) { onDone(cache[key]); return; }
+  Q.push({key, sysprompt, userprompt, tokens, onDone});
+  if (!qRunning) runQueue();
+}
+
+async function runQueue() {
+  if (Q.length === 0) { qRunning = false; setQStat('IDLE'); return; }
+  qRunning = true;
+  const job = Q.shift();
+  setQStat(`${Q.length + 1} PENDING`);
+  try {
+    const result = await rawCall(job.sysprompt, job.userprompt, job.tokens);
+    cache[job.key] = result;
+    job.onDone(result);
+  } catch(e) {
+    console.warn('Queue job failed:', job.key, e.message);
+    job.onDone(null);
+  }
+  await sleep(420);
+  runQueue();
+}
+
+async function rawCall(sys, usr, tokens = 280) {
+  const body = {
+    model: MODEL, max_tokens: tokens,
+    messages: [{role:'system',content:sys},{role:'user',content:usr}],
+    tools: [{type:'web_search_20250305',name:'web_search'}]
+  };
+  const r = await fetch(URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${KEY}`,'HTTP-Referer':'https://bharat-monitor.in','X-Title':'Bharat Monitor v2'},
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const d = await r.json();
+  return (d.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n');
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function setQStat(s){
+  document.getElementById('qstat').textContent = 'Q: ' + s;
+}
+
+// JSON helpers
+function jParse(txt) {
+  try { const c=txt.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim(); const s=c.indexOf('{'),e=c.lastIndexOf('}'); return JSON.parse(c.slice(s,e+1)); } catch{return null;}
+}
+function jArr(txt) {
+  try { const c=txt.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim(); const s=c.indexOf('['),e=c.lastIndexOf(']'); return JSON.parse(c.slice(s,e+1)); } catch{return null;}
+}
+
+// ══════════════════════════════════════════════════════════
 //  CLOCK
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function tick() {
-  const now = new Date();
-  const ist = new Date(now.getTime() + 5.5 * 3600000);
-  const p = n => String(n).padStart(2,'0');
-  document.getElementById('clock').textContent =
-    `${p(ist.getUTCHours())}:${p(ist.getUTCMinutes())}:${p(ist.getUTCSeconds())} IST`;
-
-  if (nextRefreshTime) {
-    const diff = Math.max(0, nextRefreshTime - Date.now());
-    const m = p(Math.floor(diff/60000));
-    const s = p(Math.floor((diff%60000)/1000));
-    document.getElementById('next-refresh').textContent = `NEXT REFRESH: ${m}:${s}`;
+  const ist = new Date(Date.now() + 5.5*3600000);
+  const p = n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent = `${p(ist.getUTCHours())}:${p(ist.getUTCMinutes())}:${p(ist.getUTCSeconds())} IST`;
+  if (nextRefresh) {
+    const d = Math.max(0, nextRefresh - Date.now());
+    const m = p(Math.floor(d/60000)), s = p(Math.floor((d%60000)/1000));
+    document.getElementById('nxt').textContent = `REFRESH: ${m}:${s}`;
   }
 }
 setInterval(tick, 1000); tick();
 
-// ══════════════════════════════════════════════
-//  API HELPER — with web search
-// ══════════════════════════════════════════════
-async function callAI(systemPrompt, userPrompt, useWebSearch = true, maxTokens = 1200) {
-  const body = {
-    model: MODEL,
-    max_tokens: maxTokens,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user',   content: userPrompt }
-    ]
-  };
-  if (useWebSearch) {
-    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-  }
-  const res = await fetch(OR_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OR_KEY}`,
-      'HTTP-Referer': 'https://bharat-monitor.in',
-      'X-Title': 'Bharat Monitor'
-    },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) throw new Error(`API ${res.status}`);
-  const data = await res.json();
-  // Collect all text blocks
-  const text = (data.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n');
-  return text;
+// ══════════════════════════════════════════════════════════
+//  BANNER
+// ══════════════════════════════════════════════════════════
+function showB(t){ const e=document.getElementById('mstat'); e.textContent='⟳ '+t; e.style.display='block'; }
+function hideB(){ document.getElementById('mstat').style.display='none'; }
+
+// ══════════════════════════════════════════════════════════
+//  LOADERS — each calls enqueue with tight prompts
+// ══════════════════════════════════════════════════════════
+
+function loadNatPulse() {
+  const el = document.getElementById('natpulse');
+  el.innerHTML = '<div class="sec-loading">LOADING</div>';
+  enqueue('natpulse',
+    'Indian fiscal analyst. Return ONLY valid JSON, no markdown.',
+    'Latest India FY2025-26 data. Return JSON: {"gdp":"$3.9T","gdp_g":"6.8%","tax":"₹34L Cr","tax_g":"12%","exp":"₹47.6L Cr","deficit":"5.1%","forex":"$623B","inflation":"4.2%","gst":"₹1.96L Cr"}',
+    260,
+    txt => {
+      const d = jParse(txt);
+      if (!d) { el.innerHTML='<div style="font-size:9px;color:var(--dim)">Data unavailable</div>'; return; }
+      el.innerHTML = `
+        <div class="mstat s"><div class="msl">GDP</div><div class="msv">${d.gdp||'--'}</div><div class="msd up">▲ ${d.gdp_g||'--'}</div></div>
+        <div class="mstat g"><div class="msl">TAX COLLECTED</div><div class="msv">${d.tax||'--'}</div><div class="msd up">▲ ${d.tax_g||'--'}</div></div>
+        <div class="mstat b"><div class="msl">EXPENDITURE</div><div class="msv">${d.exp||'--'}</div></div>
+        <div class="mstat r"><div class="msl">FISCAL DEFICIT</div><div class="msv">${d.deficit||'--'}</div><div class="msd dn">of GDP</div></div>
+        <div class="mstat p"><div class="msl">FOREX / INFLATION</div><div class="msv" style="font-size:11px">${d.forex||'--'} / ${d.inflation||'--'}</div></div>`;
+    }
+  );
 }
 
-// ══════════════════════════════════════════════
-//  JSON PARSE HELPER
-// ══════════════════════════════════════════════
-function safeJSON(text) {
-  try {
-    const clean = text.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
-    const start = clean.indexOf('{'); const end = clean.lastIndexOf('}');
-    if (start === -1 || end === -1) throw new Error('no JSON');
-    return JSON.parse(clean.slice(start, end+1));
-  } catch(e) {
-    console.warn('JSON parse fail:', e, text.slice(0,200));
-    return null;
-  }
-}
-function safeJSONArray(text) {
-  try {
-    const clean = text.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
-    const start = clean.indexOf('['); const end = clean.lastIndexOf(']');
-    if (start === -1 || end === -1) throw new Error('no array');
-    return JSON.parse(clean.slice(start, end+1));
-  } catch(e) {
-    console.warn('JSON array parse fail:', e);
-    return null;
-  }
+function loadAlertFeed() {
+  enqueue('alerts',
+    'India intelligence analyst. Return ONLY JSON array.',
+    'Latest significant India news/events March 2026. Return JSON array of 6: [{"level":"high/med/low","title":"short headline","loc":"state","time":"Xm ago","cat":"SECURITY/ECONOMY/DISASTER/POLITICS"}]. Use current web data.',
+    320,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('alert-feed');
+      if (!arr) { el.innerHTML='<div style="font-size:9px;color:var(--dim);padding:6px">Feed unavailable</div>'; return; }
+      document.getElementById('alert-chip').innerHTML = `<div class="dot"></div>${arr.filter(a=>a.level==='high').length} HIGH`;
+      el.innerHTML = arr.map(a=>`<div class="fi"><div class="fd ${a.level||'m'}"></div><div><div class="fat">${a.title||'Alert'}</div><div class="fam">${(a.loc||'INDIA').toUpperCase()} • ${a.time||'RECENT'} • ${a.cat||''}</div></div></div>`).join('');
+      // Ticker
+      const tk = arr.map(a=>`${a.cat||'NEWS'}: ${a.title||''}`).join('   ▪   ');
+      const el2 = document.getElementById('tk');
+      el2.textContent = tk + '   ▪   ' + tk;
+    }
+  );
 }
 
-// ══════════════════════════════════════════════
-//  DATA FETCHERS — all real-time via AI
-// ══════════════════════════════════════════════
-
-async function fetchOverview() {
-  showBanner('FETCHING NATIONAL OVERVIEW...');
-  const sys = `You are a precise Indian fiscal data analyst. Return ONLY valid JSON, no prose, no markdown fences.`;
-  const usr = `Search the web for India's LATEST fiscal data for FY2025-26. Return this exact JSON structure with real current numbers:
-{
-  "gdp": "value with unit e.g. $3.9T",
-  "gdp_growth": "e.g. 6.8%",
-  "gdp_delta": "up or down",
-  "tax_collected": "e.g. ₹34L Cr",
-  "tax_growth": "e.g. 12%",
-  "expenditure": "e.g. ₹47.6L Cr",
-  "fiscal_deficit": "e.g. 5.1%",
-  "deficit_note": "e.g. of GDP",
-  "forex_reserves": "e.g. $623B",
-  "inflation": "e.g. 4.2%",
-  "unemployment": "e.g. 7.8%",
-  "gst_latest_month": "e.g. ₹1.96L Cr"
-}`;
-  const txt = await callAI(sys, usr, true, 600);
-  const d = safeJSON(txt);
-  if (d) {
-    liveData.overview = d;
-    renderOverview(d);
-  }
+function loadStateTax() {
+  enqueue('statetax',
+    'India fiscal analyst. Return ONLY JSON array.',
+    'Top 8 Indian states by GST/tax revenue FY2025-26. JSON: [{"state":"Maharashtra","tax":"₹16.8L Cr","pct":100},{"state":"Karnataka","tax":"₹8.6L Cr","pct":51},...]. pct relative to top state.',
+    280,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('peace-mini');  // actually used for state tax in left
+      if (!arr) return;
+      layerData.tax = arr;
+      renderPeaceMini(); // will be populated by peace loader
+      colorMapByTax(arr);
+      renderSbTaxBars(arr);
+    }
+  );
 }
 
-async function fetchStateTax() {
-  showBanner('FETCHING STATE TAX DATA...');
-  const sys = `You are an Indian fiscal analyst. Return ONLY valid JSON array.`;
-  const usr = `Search for the latest state-wise GST/tax contribution data for India FY2025-26. Return a JSON array of top 8 states:
-[{"state":"Maharashtra","tax":"₹16.8L Cr","pct":85},{"state":"Karnataka","tax":"₹8.6L Cr","pct":43},...]
-Use real current data. pct is percentage of top state (0-100).`;
-  const txt = await callAI(sys, usr, true, 600);
-  const arr = safeJSONArray(txt);
-  if (arr) {
-    liveData.stateTax = arr;
-    renderStateTaxBars(arr);
-    colorMapByTax(arr);
-  }
+function renderSbTaxBars(arr) {
+  // We'll show tax bars in the peace mini section if peace not loaded yet
+  // Actually we render in overview tab
 }
 
-async function fetchStateDetail(stateName) {
-  showBanner(`FETCHING ${stateName.toUpperCase()} DATA...`);
-  const sys = `You are an Indian state governance analyst. Return ONLY valid JSON.`;
-  const usr = `Search for latest data for Indian state: ${stateName}. Return JSON:
-{
-  "state": "${stateName}",
-  "capital": "city name",
-  "population": "e.g. 12.4 Cr",
-  "gdp_contribution": "e.g. 15.4%",
-  "tax_revenue": "e.g. ₹16.8L Cr",
-  "expenditure": "e.g. ₹11.2L Cr",
-  "peace_index": 60,
-  "active_projects": 28,
-  "literacy": "e.g. 77.2%",
-  "cm": "Chief Minister name"
-}`;
-  const txt = await callAI(sys, usr, true, 500);
-  const d = safeJSON(txt);
-  if (d) showStatePopup(d);
-  hideBanner();
+function loadPeaceIndex() {
+  enqueue('peace',
+    'India security analyst. Return ONLY JSON array.',
+    'State-wise peace index India 2025 based on police cases, strikes, unemployment, corruption. JSON array of 8 states: [{"state":"Kerala","idx":78,"cases":"low","strikes":"rare","corruption":"low"},{"state":"UP","idx":42,...}]. Mix high and low peace states.',
+    320,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('peace-mini');
+      if (!arr) { el.innerHTML='<div style="font-size:9px;color:var(--dim);padding:6px">Unavailable</div>'; return; }
+      layerData.peace = arr;
+      el.innerHTML = arr.slice(0,7).map(s=>{
+        const c = s.idx>70?'#22c55e':s.idx>50?'#fbbf24':'#f43f5e';
+        return `<div class="br">
+          <div class="bl" style="font-size:9px">${(s.state||'').substring(0,9)}</div>
+          <div class="bt"><div class="bf" style="width:${s.idx||0}%;background:linear-gradient(90deg,${c}44,${c})"></div></div>
+          <div class="bv" style="color:${c}">${s.idx||0}</div></div>`;
+      }).join('');
+    }
+  );
 }
 
-async function fetchProjects() {
-  showBanner('FETCHING MEGA PROJECTS...');
-  const sys = `You are an Indian infrastructure analyst. Return ONLY valid JSON array.`;
-  const usr = `Search for India's current major infrastructure mega projects in 2025-2026. Return a JSON array of 6 projects:
-[{"name":"Project Name","state":"Location","budget":"₹X Cr","progress":45,"status":"ACTIVE or ON TRACK or DELAYED or PLANNING","sector":"RAIL or ROAD or ENERGY or DIGITAL"}]
-Use real current project data from news.`;
-  const txt = await callAI(sys, usr, true, 700);
-  const arr = safeJSONArray(txt);
-  if (arr) {
-    liveData.projects = arr;
-    renderProjectList(arr);
-    renderProjectSectorBars(arr);
-  }
+function loadUnemp() {
+  enqueue('unemp',
+    'India labour economist. Return ONLY JSON array.',
+    'India unemployment rate by sector 2025-26. JSON: [{"sector":"Engineering","rate":"7.2%","pct":72},{"sector":"Medical","rate":"3.1%","pct":31},{"sector":"IT","rate":"5.8%","pct":58},{"sector":"Agriculture","rate":"12.4%","pct":100},{"sector":"Retail","rate":"9.6%","pct":96}]. Use real data.',
+    260,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('unemp-bars');
+      if (!arr) { el.innerHTML='<div style="font-size:9px;color:var(--dim)">Unavailable</div>'; return; }
+      el.innerHTML = arr.map(s=>{
+        const c = s.pct>75?'#f43f5e':s.pct>50?'#fbbf24':'#22c55e';
+        return `<div class="br">
+          <div class="bl" style="font-size:9px">${(s.sector||'').substring(0,9)}</div>
+          <div class="bt"><div class="bf" style="width:${s.pct||0}%;background:linear-gradient(90deg,${c}44,${c})"></div></div>
+          <div class="bv" style="color:${c}">${s.rate||'--'}</div></div>`;
+      }).join('');
+    }
+  );
 }
 
-async function fetchAlerts() {
-  showBanner('FETCHING INTELLIGENCE ALERTS...');
-  const sys = `You are an Indian intelligence analyst. Return ONLY valid JSON array.`;
-  const usr = `Search for latest significant news and events happening in India right now (March 2026). Return a JSON array of 7 alerts:
-[{"level":"high or med or low","title":"short title","location":"State/Region","time":"X min ago or X hrs ago","category":"SECURITY or ECONOMY or DISASTER or POLITICS or ACHIEVEMENT"}]
-Mix different categories. Use real current news.`;
-  const txt = await callAI(sys, usr, true, 700);
-  const arr = safeJSONArray(txt);
-  if (arr) {
-    liveData.alerts = arr;
-    renderAlertFeed(arr);
-    updateAlertCount(arr);
-  }
+function loadCorrupt() {
+  enqueue('corrupt',
+    'Indian political analyst. Return ONLY JSON array.',
+    'Top 6 Indian politicians with most corruption allegations/cases 2024-2025 (all parties). JSON: [{"name":"Name","party":"BJP/INC/TMC/etc","cases":"brief desc","state":"state","status":"CHARGESHEETED/CONVICTED/BAIL/ACQUITTED"}]. Use real public cases only.',
+    320,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('corrupt-list');
+      if (!arr) { el.innerHTML='<div style="font-size:9px;color:var(--dim)">Unavailable</div>'; return; }
+      const pcol={'BJP':'#ff9933','INC':'#138808','TMC':'#00a651','AAP':'#0066ff','SP':'#ff0000','BSP':'#1565c0'};
+      el.innerHTML = arr.map((p,i)=>{
+        const sc = {'CHARGESHEETED':'#f43f5e','CONVICTED':'#7f1d1d','BAIL':'#fbbf24','ACQUITTED':'#22c55e'}[p.status]||'#94a3b8';
+        const pc = pcol[p.party]||'#94a3b8';
+        return `<div class="fi"><div class="fd h"></div><div><div class="fat">${p.name||'Unknown'} <span style="font-size:8px;color:${pc};border:1px solid ${pc};padding:0 3px">${p.party||''}</span></div><div class="fam">${p.cases||'--'} | ${p.state||''}</div><div><span style="color:${sc};font-size:8px">${p.status||''}</span></div></div></div>`;
+      }).join('');
+    }
+  );
 }
 
-async function fetchPeaceIndex() {
-  showBanner('FETCHING PEACE INDEX...');
-  const sys = `You are a peace and security analyst for India. Return ONLY valid JSON.`;
-  const usr = `Search for India's latest peace index, internal security situation, and conflict statistics 2025-2026. Return JSON:
-{
-  "national_index": 58,
-  "rank_global": "135 of 163",
-  "incidents_ytd": 247,
-  "conflict_zones": 3,
-  "crime_trend": "-4.2%",
-  "peacekeepers": "8,420",
-  "states": [
-    {"state":"State Name","index":76,"status":"STABLE or ELEVATED or CRITICAL"}
-  ]
-}
-Include top 6 states by peace ranking.`;
-  const txt = await callAI(sys, usr, true, 700);
-  const d = safeJSON(txt);
-  if (d) {
-    liveData.peace = d;
-    renderPeaceMetrics(d);
-    renderPeaceBarsLeft(d.states);
-  }
+function loadExp() {
+  enqueue('exp',
+    'India budget analyst. Return ONLY JSON array.',
+    'India Union Budget 2025-26 expenditure by sector. JSON array of 6: [{"sector":"INFRASTRUCTURE","pct":22,"color":"#FF9933"},...]. Real percentages summing ~100.',
+    220,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('exp-bars');
+      if (!arr) { el.innerHTML='<div class="sk"></div><div class="sk"></div>'; return; }
+      el.innerHTML = arr.map(e=>`<div class="br">
+        <div class="bl" style="font-size:9px">${(e.sector||'').substring(0,10)}</div>
+        <div class="bt"><div class="bf" style="width:${e.pct||0}%;background:linear-gradient(90deg,${e.color||'#FF9933'}44,${e.color||'#FF9933'})"></div></div>
+        <div class="bv" style="color:${e.color||'#FF9933'}">${e.pct||0}%</div></div>`).join('');
+    }
+  );
 }
 
-async function fetchDefence() {
-  showBanner('FETCHING DEFENCE DATA...');
-  const sys = `You are an Indian defence analyst. Return ONLY valid JSON.`;
-  const usr = `Search for India's latest defence budget, military strength, and readiness data 2025-2026. Return JSON:
-{
-  "budget": "₹6.22L Cr",
-  "budget_gdp_pct": "2.2%",
-  "active_personnel": "14.55 Lakh",
-  "exports": "₹21,083 Cr",
-  "readiness": "DEFCON 4",
-  "rank_global": 4,
-  "commands": [
-    {"name":"Northern Command","readiness":85,"status":"HIGH"},
-    {"name":"Western Command","readiness":72,"status":"ELEVATED"},
-    {"name":"Eastern Command","readiness":68,"status":"ELEVATED"},
-    {"name":"Southern Command","readiness":55,"status":"NORMAL"},
-    {"name":"Central Command","readiness":60,"status":"NORMAL"}
-  ]
-}`;
-  const txt = await callAI(sys, usr, true, 600);
-  const d = safeJSON(txt);
-  if (d) {
-    liveData.defence = d;
-    renderDefenceMetrics(d);
-    renderDefenceBarsLeft(d.commands);
-  }
+function loadRich() {
+  if (cache['rich']) return; // already loaded
+  enqueue('rich',
+    'India wealth analyst. Return ONLY JSON array.',
+    'Top 8 richest Indians 2025-26 by net worth. JSON: [{"rank":1,"name":"Mukesh Ambani","wealth":"$119B","source":"Energy/Retail","state":"Maharashtra","trend":"up"},...]. Use Forbes/Hurun real data.',
+    320,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('rich-list');
+      if (!arr) { el.innerHTML='<div style="font-size:9px;color:var(--dim)">Unavailable</div>'; return; }
+      el.innerHTML = arr.map(r=>{
+        const init = (r.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        return `<div class="rc">
+          <div class="ra">${init}</div>
+          <div>
+            <div class="rn">#${r.rank||'?'} ${r.name||'--'}</div>
+            <div class="rw">${r.wealth||'--'} <span style="color:${r.trend==='up'?'#22c55e':'#f43f5e'}">${r.trend==='up'?'▲':'▼'}</span></div>
+            <div class="ri">${r.source||''} · ${r.state||''}</div>
+          </div></div>`;
+      }).join('');
+      // wealth by state bars
+      const byState = {};
+      arr.forEach(r=>{ const s=r.state||'Other'; byState[s]=(byState[s]||0)+1; });
+      const el2 = document.getElementById('wealth-bars');
+      const maxC = Math.max(...Object.values(byState));
+      el2.innerHTML = Object.entries(byState).sort((a,b)=>b[1]-a[1]).map(([s,c])=>`
+        <div class="br"><div class="bl">${s.substring(0,9)}</div>
+        <div class="bt"><div class="bf" style="width:${(c/maxC*100).toFixed(0)}%;background:linear-gradient(90deg,#fbbf2444,#fbbf24)"></div></div>
+        <div class="bv" style="color:#fbbf24">${c} UHNWs</div></div>`).join('');
+    }
+  );
 }
 
-async function fetchExpenditure() {
-  showBanner('FETCHING EXPENDITURE DATA...');
-  const sys = `You are an Indian budget analyst. Return ONLY valid JSON array.`;
-  const usr = `Search for India's Union Budget 2025-26 expenditure allocation by sector. Return a JSON array:
-[{"sector":"INFRASTRUCTURE","pct":22,"color":"#FF9933"},{"sector":"EDUCATION","pct":14,"color":"#4fc3f7"},...]
-Include 6-7 sectors with real percentages adding to ~100. Assign distinct colors.`;
-  const txt = await callAI(sys, usr, true, 500);
-  const arr = safeJSONArray(txt);
-  if (arr) {
-    liveData.expenditure = arr;
-    renderExpBars(arr);
-    drawGSTChart();
-  }
+function loadED() {
+  if (cache['ed']) return;
+  enqueue('ed',
+    'India legal analyst. Return ONLY JSON array.',
+    'Top 8 active ED (Enforcement Directorate) and CBI cases in India 2024-2025. JSON: [{"name":"Accused Name/Entity","case":"brief case desc","agency":"ED/CBI/IT","amount":"₹X Cr","status":"ARRESTED/BAIL/TRIAL/ABSCONDING","state":"state"}]. Use real active cases from news.',
+    380,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('ed-list');
+      if (!arr) { el.innerHTML='<div style="font-size:9px;color:var(--dim)">Unavailable</div>'; return; }
+      const scmap = {'ARRESTED':'#f43f5e','BAIL':'#fbbf24','TRIAL':'#fb923c','ABSCONDING':'#a78bfa','CONVICTED':'#7f1d1d'};
+      el.innerHTML = arr.map(e=>{
+        const sc = scmap[e.status]||'#94a3b8';
+        const ac = {'ED':'#fb923c','CBI':'#f43f5e','IT':'#fbbf24'}[e.agency]||'#94a3b8';
+        return `<div class="edi">
+          <div class="edn">${e.name||'Unknown'} <span class="eds" style="color:${sc};border-color:${sc};background:${sc}18">${e.status||'--'}</span></div>
+          <div class="edm" style="margin-top:2px">${e.case||'--'}</div>
+          <div class="edm"><span style="color:${ac}">[${e.agency||'ED'}]</span> ${e.state||''} | ${e.amount||'--'}</div>
+        </div>`;
+      }).join('');
+    }
+  );
 }
 
-async function fetchSchemes() {
-  showBanner('FETCHING SCHEME DATA...');
-  const sys = `You are an Indian government scheme analyst. Return ONLY valid JSON array.`;
-  const usr = `Search for the latest implementation progress of major Indian government schemes in 2025-2026. Return a JSON array of 5 schemes:
-[{"name":"PM AWAS YOJANA","pct":68,"color":"#FF9933"}]
-Use real current progress percentages from news/official data.`;
-  const txt = await callAI(sys, usr, true, 500);
-  const arr = safeJSONArray(txt);
-  if (arr) {
-    liveData.schemes = arr;
-    renderSchemeBars(arr);
-  }
+function loadRivers() {
+  if (cache['rivers']) return;
+  enqueue('rivers',
+    'India water quality analyst. Return ONLY JSON array.',
+    'India river pollution data 2025. JSON array of 8 rivers: [{"river":"Ganga","bod":8.5,"do":3.2,"status":"CRITICAL","states":["UP","Bihar","WB"],"cause":"Sewage+Industrial"},...]. BOD in mg/L (standard <3 is clean). Include Yamuna, Sabarmati, Godavari, Krishna, Brahmaputra, Cauvery.',
+    360,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('river-list');
+      const el2 = document.getElementById('bod-bars');
+      if (!arr) { el.innerHTML='<div style="font-size:9px;color:var(--dim)">Unavailable</div>'; return; }
+      layerData.rivers = arr;
+      const getC = s => s==='CRITICAL'?'#f43f5e':s==='POOR'?'#fb923c':s==='MODERATE'?'#fbbf24':'#22c55e';
+      el.innerHTML = arr.map(r=>{
+        const c = getC(r.status);
+        return `<div class="fi"><div class="fd ${r.status==='CRITICAL'?'h':r.status==='POOR'?'m':'l'}"></div><div>
+          <div class="fat">${r.river||'--'} <span style="color:${c};font-size:8px;border:1px solid ${c};padding:0 3px">${r.status||'--'}</span></div>
+          <div class="fam">BOD: ${r.bod||'--'} mg/L | DO: ${r.do||'--'} mg/L</div>
+          <div class="fam">${(r.states||[]).join(', ')} | ${r.cause||''}</div>
+        </div></div>`;
+      }).join('');
+      const maxBod = Math.max(...arr.map(r=>r.bod||0));
+      el2.innerHTML = arr.map(r=>{
+        const pct = (r.bod||0)/(maxBod||1)*100;
+        const c = r.bod>6?'#f43f5e':r.bod>3?'#fbbf24':'#22c55e';
+        return `<div class="br"><div class="bl">${(r.river||'').substring(0,8)}</div>
+          <div class="bt"><div class="bf" style="width:${pct.toFixed(0)}%;background:linear-gradient(90deg,${c}44,${c})"></div></div>
+          <div class="bv" style="color:${c}">${r.bod||0}</div></div>`;
+      }).join('');
+    }
+  );
 }
 
-async function fetchTicker() {
-  const sys = `You are a news ticker writer. Return ONLY a single line of text.`;
-  const usr = `Search for 8 significant recent India news headlines from March 2026. Format them as a single ticker string separated by "   |||   ". Each item should be: TOPIC: SHORT HEADLINE. Example: "GDP: INDIA ECONOMY GROWS 6.8% IN Q3   |||   GST: FEBRUARY COLLECTION HITS ₹1.96L CR"`;
-  const txt = await callAI(sys, usr, true, 400);
-  const clean = txt.replace(/```/g,'').trim();
-  if (clean.length > 20) {
-    const doubled = clean + '   |||   ' + clean;
-    document.getElementById('tk').textContent = doubled;
-  }
+function loadVitals() {
+  if (cache['vitals']) return;
+  enqueue('vitals',
+    'India demography analyst. Return ONLY JSON.',
+    'India vital stats 2025-26. Return JSON: {"births_day":65000,"deaths_day":27000,"births_year":"2.4 Cr","deaths_year":"99 L","infant_mortality":26,"life_exp":70.2,"maternal_mortality":103,"pop_growth":"0.82%","tfr":2.0,"top_causes":["Heart Disease","Respiratory","Diarrhea"]}',
+    260,
+    txt => {
+      const d = jParse(txt);
+      const el = document.getElementById('vitals-list');
+      if (!d) { el.innerHTML='<div style="font-size:9px;color:var(--dim)">Unavailable</div>'; return; }
+      el.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">
+          <div class="mstat g" style="padding:5px 7px"><div class="msl">BIRTHS/DAY</div><div class="msv" style="font-size:13px">${(d.births_day||0).toLocaleString()}</div></div>
+          <div class="mstat r" style="padding:5px 7px"><div class="msl">DEATHS/DAY</div><div class="msv" style="font-size:13px">${(d.deaths_day||0).toLocaleString()}</div></div>
+          <div class="mstat b" style="padding:5px 7px"><div class="msl">LIFE EXPECT</div><div class="msv" style="font-size:13px">${d.life_exp||'--'}</div></div>
+          <div class="mstat p" style="padding:5px 7px"><div class="msl">TFR</div><div class="msv" style="font-size:13px">${d.tfr||'--'}</div></div>
+        </div>
+        ${(d.top_causes||[]).map((c,i)=>`<div class="fi"><div class="fd m"></div><div><div class="fat">#${i+1} ${c}</div><div class="fam">TOP CAUSE OF DEATH</div></div></div>`).join('')}`;
+    }
+  );
 }
 
-// ══════════════════════════════════════════════
-//  RENDERERS
-// ══════════════════════════════════════════════
-
-function renderOverview(d) {
-  const el = document.getElementById('overview-grid');
-  el.innerHTML = `
-    <div class="sc">
-      <div class="sl">GDP</div>
-      <div class="sv">${d.gdp||'--'}</div>
-      <div class="sd ${d.gdp_delta==='up'?'up':'dn'}">${d.gdp_delta==='up'?'▲':'▼'} ${d.gdp_growth||'--'} YoY</div>
-    </div>
-    <div class="sc g">
-      <div class="sl">TAX COLLECTED</div>
-      <div class="sv">${d.tax_collected||'--'}</div>
-      <div class="sd up">▲ ${d.tax_growth||'--'}</div>
-    </div>
-    <div class="sc b">
-      <div class="sl">EXPENDITURE</div>
-      <div class="sv">${d.expenditure||'--'}</div>
-    </div>
-    <div class="sc r">
-      <div class="sl">FISCAL DEFICIT</div>
-      <div class="sv">${d.fiscal_deficit||'--'}</div>
-      <div class="sd dn">${d.deficit_note||'of GDP'}</div>
-    </div>
-    <div class="sc b" style="grid-column:span 2">
-      <div class="sl">FOREX RESERVES</div>
-      <div class="sv" style="font-size:13px">${d.forex_reserves||'--'} &nbsp;<span style="font-size:10px;color:var(--dim)">INFLATION: ${d.inflation||'--'} &nbsp; GST: ${d.gst_latest_month||'--'}</span></div>
-    </div>`;
+function loadAQI() {
+  if (cache['aqi']) return;
+  enqueue('aqi',
+    'India air quality analyst. Return ONLY JSON array.',
+    'Current AQI levels for 8 Indian cities March 2026. JSON: [{"city":"Delhi","aqi":285,"cat":"SEVERE","pm25":180,"pm10":310,"state":"Delhi"},{"city":"Mumbai","aqi":124,...}]. Use real current data.',
+    280,
+    txt => {
+      const arr = jArr(txt);
+      const el = document.getElementById('aqi-bars');
+      if (!arr) { el.innerHTML='<div style="font-size:9px;color:var(--dim)">Unavailable</div>'; return; }
+      layerData.aqi = arr;
+      const maxA = Math.max(...arr.map(a=>a.aqi||0));
+      document.getElementById('lc-aqi').textContent = arr.length;
+      el.innerHTML = arr.map(a=>{
+        const c = a.aqi>300?'#7f1d1d':a.aqi>200?'#f43f5e':a.aqi>150?'#fb923c':a.aqi>100?'#fbbf24':'#22c55e';
+        const pct = ((a.aqi||0)/Math.max(maxA,500)*100).toFixed(0);
+        return `<div class="br"><div class="bl">${(a.city||'').substring(0,8)}</div>
+          <div class="bt"><div class="bf" style="width:${pct}%;background:linear-gradient(90deg,${c}44,${c})"></div></div>
+          <div class="bv" style="color:${c}">${a.aqi||0}</div></div>`;
+      }).join('');
+      // Update AQI circle colors on map
+      updateAQIMap(arr);
+    }
+  );
 }
 
-function renderStateTaxBars(arr) {
-  const el = document.getElementById('state-tax-bars');
-  const max = Math.max(...arr.map(s=>s.pct||0));
-  el.innerHTML = arr.map(s => {
-    const pct = max > 0 ? (s.pct/max*100).toFixed(0) : 50;
-    const col = s.pct > 70 ? '#FF9933' : s.pct > 40 ? '#ffd700' : '#4caf50';
-    return `<div class="br">
-      <div class="bl">${(s.state||'').substring(0,8)}</div>
-      <div class="bt"><div class="bf" style="width:${pct}%;background:linear-gradient(90deg,${col}66,${col})"></div></div>
-      <div class="bv" style="color:${col}">${s.tax||'--'}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderProjectSectorBars(arr) {
-  const sectors = {};
-  arr.forEach(p => { sectors[p.sector||'OTHER'] = (sectors[p.sector||'OTHER']||0) + 1; });
-  const total = arr.length || 1;
-  const el = document.getElementById('proj-sector-bars');
-  el.innerHTML = Object.entries(sectors).map(([s,c]) => {
-    const pct = Math.round(c/total*100);
-    const cols = {RAIL:'#ffd700',ROAD:'#FF9933',ENERGY:'#ff4444',DIGITAL:'#4fc3f7',DEFENCE:'#ab47bc',OTHER:'#4caf50'};
-    const col = cols[s]||'#4caf50';
-    return `<div class="br">
-      <div class="bl">${s.substring(0,8)}</div>
-      <div class="bt"><div class="bf" style="width:${pct}%;background:linear-gradient(90deg,${col}55,${col})"></div></div>
-      <div class="bv" style="color:${col}">${c} proj</div>
-    </div>`;
-  }).join('');
-}
-
-function renderPeaceBarsLeft(states) {
-  if (!states) return;
-  const el = document.getElementById('peace-bars-left');
-  el.innerHTML = states.map(s => {
-    const col = s.index > 70 ? '#4caf50' : s.index > 50 ? '#ffd700' : '#ff4444';
-    return `<div class="br">
-      <div class="bl">${(s.state||'').substring(0,8)}</div>
-      <div class="bt"><div class="bf" style="width:${s.index}%;background:linear-gradient(90deg,${col}55,${col})"></div></div>
-      <div class="bv" style="color:${col}">${s.index}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderDefenceBarsLeft(commands) {
-  if (!commands) return;
-  const el = document.getElementById('defence-bars-left');
-  el.innerHTML = commands.map(c => {
-    const col = c.readiness > 75 ? '#ff4444' : c.readiness > 60 ? '#ffd700' : '#4caf50';
-    return `<div class="br">
-      <div class="bl" style="font-size:9px">${(c.name||'').replace(' Command','')}</div>
-      <div class="bt"><div class="bf" style="width:${c.readiness}%;background:linear-gradient(90deg,${col}55,${col})"></div></div>
-      <div class="bv" style="color:${col};font-size:8px">${c.status||'--'}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderSchemeBars(arr) {
-  const el = document.getElementById('scheme-bars');
-  el.innerHTML = arr.map(s => `<div class="br">
-    <div class="bl" style="font-size:8px;width:80px">${(s.name||'').substring(0,12)}</div>
-    <div class="bt"><div class="bf" style="width:${s.pct||0}%;background:linear-gradient(90deg,${s.color||'#FF9933'}55,${s.color||'#FF9933'})"></div></div>
-    <div class="bv" style="color:${s.color||'#FF9933'}">${s.pct||0}%</div>
-  </div>`).join('');
-}
-
-function renderAlertFeed(arr) {
-  const el = document.getElementById('feed-wrap');
-  el.innerHTML = arr.map(a => `<div class="ai">
-    <div class="ad ${a.level||'m'}"></div>
-    <div>
-      <div class="at">${a.title||'Alert'}</div>
-      <div class="am">${(a.location||'INDIA').toUpperCase()} • ${a.time||'RECENT'} ${a.category?'• '+a.category:''}</div>
-    </div>
-  </div>`).join('');
-}
-
-function updateAlertCount(arr) {
-  const high = arr.filter(a=>a.level==='high').length;
-  const pill = document.getElementById('alert-count-pill');
-  pill.innerHTML = `<div class="blink"></div>${high} HIGH ALERT${high!==1?'S':''}`;
-}
-
-function renderExpBars(arr) {
-  const el = document.getElementById('exp-bars');
-  el.innerHTML = arr.map(e => `<div class="br">
-    <div class="bl" style="font-size:9px;width:75px">${(e.sector||'').substring(0,11)}</div>
-    <div class="bt"><div class="bf" style="width:${e.pct||0}%;background:linear-gradient(90deg,${e.color||'#FF9933'}55,${e.color||'#FF9933'})"></div></div>
-    <div class="bv" style="color:${e.color||'#FF9933'}">${e.pct||0}%</div>
-  </div>`).join('');
-}
-
-function renderProjectList(arr) {
-  const el = document.getElementById('proj-list');
-  el.innerHTML = arr.map(p => {
-    const smap = {'ACTIVE':'#FF9933','ON TRACK':'#4caf50','DELAYED':'#ff4444','PLANNING':'#ffd700','NEAR COMPLETE':'#4fc3f7'};
-    const sc = smap[p.status||'ACTIVE']||'#FF9933';
-    return `<div class="pj">
-      <div class="pjn">${p.name||'Project'}</div>
-      <div class="pjm">${p.state||'India'} | ${p.budget||'--'}</div>
-      <div class="pjb">
-        <div class="pjt"><div class="pjf" style="width:${p.progress||0}%;background:${sc}"></div></div>
-        <div class="pjp" style="color:${sc}">${p.progress||0}%</div>
-        <div class="pjs" style="color:${sc};border-color:${sc}">${p.status||'--'}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderPeaceMetrics(d) {
-  const el = document.getElementById('peace-metrics');
-  el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">NATIONAL PEACE INDEX</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ffd700">${d.national_index||'--'}/100</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">GLOBAL RANK</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text)">${d.rank_global||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">INCIDENTS YTD</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--red)">${d.incidents_ytd||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">ACTIVE CONFLICT ZONES</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ffd700">${d.conflict_zones||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">CRIME RATE TREND</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#4caf50">${d.crime_trend||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0">
-      <span style="font-size:10px;color:var(--dim)">PEACEKEEPERS DEPLOYED</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--a3)">${d.peacekeepers||'--'}</span>
-    </div>`;
-}
-
-function renderDefenceMetrics(d) {
-  const el = document.getElementById('def-metrics');
-  el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">DEFENCE BUDGET</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--saffron)">${d.budget||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">% OF GDP</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text)">${d.budget_gdp_pct||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">ACTIVE PERSONNEL</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--a3)">${d.active_personnel||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">DEFENCE EXPORTS</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#4caf50">${d.exports||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-      <span style="font-size:10px;color:var(--dim)">GLOBAL RANK</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--yellow)">#${d.rank_global||'--'}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:5px 0">
-      <span style="font-size:10px;color:var(--dim)">READINESS LEVEL</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ffd700">${d.readiness||'--'}</span>
-    </div>`;
-}
-
-// ══════════════════════════════════════════════
-//  GST CANVAS CHART
-// ══════════════════════════════════════════════
-async function drawGSTChart() {
-  const canvas = document.getElementById('gst-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 270;
-  canvas.height = 72;
-
-  // Fetch 12-month GST data
-  const sys = `You are a data analyst. Return ONLY a JSON array of 12 numbers, no text.`;
-  const usr = `Search for India's GST collection monthly data for FY2025-26 (Apr 2025 to Mar 2026) in ₹ Lakh Crore. Return ONLY a JSON array of 12 numbers like: [1.78,1.85,1.92,...]. Use real data where available, project where needed.`;
-  const txt = await callAI(sys, usr, true, 200);
-  let data;
-  try {
-    const clean = txt.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
-    const s = clean.indexOf('['); const e = clean.lastIndexOf(']');
-    data = JSON.parse(clean.slice(s,e+1));
-  } catch(e) { data = [1.78,1.85,1.92,2.1,1.98,2.14,2.07,2.22,2.18,2.34,2.28,2.45]; }
-
-  const months = ['A','M','J','J','A','S','O','N','D','J','F','M'];
-  const w = canvas.width, h = canvas.height;
-  const max = Math.max(...data), min = Math.min(...data);
-  const pad = {t:10,r:8,b:18,l:28};
-  const gw = w-pad.l-pad.r, gh = h-pad.t-pad.b;
-
-  ctx.clearRect(0,0,w,h);
-  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=.5;
-  [0,.5,1].forEach(f=>{ const y=pad.t+gh*(1-f); ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke(); });
-
-  const pts = data.map((v,i)=>({x:pad.l+(i/(data.length-1))*gw, y:pad.t+gh-((v-min)/(max-min||1))*gh}));
-  const grad = ctx.createLinearGradient(0,pad.t,0,h-pad.b);
-  grad.addColorStop(0,'rgba(255,153,51,0.28)'); grad.addColorStop(1,'rgba(255,153,51,0)');
-  ctx.beginPath(); ctx.moveTo(pts[0].x,h-pad.b);
-  pts.forEach(p=>ctx.lineTo(p.x,p.y));
-  ctx.lineTo(pts[pts.length-1].x,h-pad.b); ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
-  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
-  pts.forEach(p=>ctx.lineTo(p.x,p.y));
-  ctx.strokeStyle='#FF9933'; ctx.lineWidth=1.5; ctx.stroke();
-  pts.forEach(p=>{ ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fillStyle='#FF9933';ctx.fill(); });
-  ctx.fillStyle='rgba(200,220,230,0.35)'; ctx.font='7px Share Tech Mono'; ctx.textAlign='center';
-  months.forEach((m,i)=>ctx.fillText(m,pts[i].x,h-3));
-  ctx.fillStyle='rgba(255,153,51,0.5)'; ctx.textAlign='right';
-  ctx.fillText('₹L Cr',pad.l-2,pad.t+7);
-}
-
-// ══════════════════════════════════════════════
-//  MAP COLORING
-// ══════════════════════════════════════════════
-function colorMapByTax(arr) {
-  // Reset all
-  document.querySelectorAll('.st').forEach(p=>{ p.style.fill='#0c1824'; });
-  if (!arr) return;
-  const max = Math.max(...arr.map(s=>s.pct||0));
-  const stateMap = {
-    'Maharashtra':'st-MH','Karnataka':'st-KA','Delhi':'st-DL','Gujarat':'st-GJ',
-    'Tamil Nadu':'st-TN','Uttar Pradesh':'st-UP','Telangana':'st-TG','West Bengal':'st-WB',
-    'Rajasthan':'st-RJ','Madhya Pradesh':'st-MP','Andhra Pradesh':'st-AP','Bihar':'st-BR',
-    'Punjab':'st-PB','Haryana':'st-HR','Odisha':'st-OD','Chhattisgarh':'st-CG',
-    'Kerala':'st-KL','Jharkhand':'st-JH','Assam':'st-AS'
-  };
-  arr.forEach(s => {
-    const id = stateMap[s.state];
+function updateAQIMap(arr) {
+  const cityMap = {'Delhi':'aq-delhi','Mumbai':'aq-mumbai','Kolkata':'aq-kolkata','Patna':'aq-patna','Lucknow':'aq-lucknow','Bangalore':'aq-blr','Bengaluru':'aq-blr','Chennai':'aq-chennai','Kanpur':'aq-kanpur'};
+  arr.forEach(a => {
+    const id = cityMap[a.city];
     if (!id) return;
     const el = document.getElementById(id);
     if (!el) return;
-    const ratio = (s.pct||0) / (max||1);
-    if (ratio > 0.8)      el.style.fill = '#1c360c';
-    else if (ratio > 0.6) el.style.fill = '#172c0a';
-    else if (ratio > 0.4) el.style.fill = '#12220a';
-    else if (ratio > 0.2) el.style.fill = '#0d1a08';
-    else                  el.style.fill = '#0c1620';
+    const c = a.aqi>300?'rgba(127,0,0,0.45)':a.aqi>200?'rgba(180,0,0,0.38)':a.aqi>150?'rgba(255,100,0,0.30)':a.aqi>100?'rgba(255,165,0,0.25)':'rgba(0,128,0,0.18)';
+    el.setAttribute('fill', c);
+    const r = 18 + (a.aqi||0)/25;
+    el.setAttribute('r', Math.min(r, 45).toFixed(0));
   });
 }
 
-// ══════════════════════════════════════════════
-//  STATE INTERACTION
-// ══════════════════════════════════════════════
-document.querySelectorAll('.st').forEach(path => {
-  path.addEventListener('mouseover', function(e) {
-    const name = this.dataset.state;
-    document.getElementById('hover-info').textContent = name.toUpperCase() + ' — CLICK FOR LIVE DETAIL';
-    const tt = document.getElementById('tt');
-    tt.style.display = 'block';
-    tt.style.left = (e.clientX - 270 + 10) + 'px';
-    tt.style.top  = (e.clientY - 46 + 10) + 'px';
-    tt.innerHTML  = `<div class="tth">${name}</div><div style="font-size:10px;color:var(--dim);font-family:'Share Tech Mono',monospace">CLICK TO LOAD LIVE DATA</div>`;
-  });
-  path.addEventListener('mousemove', function(e) {
-    const tt = document.getElementById('tt');
-    tt.style.left = (e.clientX - 270 + 10) + 'px';
-    tt.style.top  = (e.clientY - 46 + 10) + 'px';
-  });
-  path.addEventListener('mouseout', function() {
-    document.getElementById('tt').style.display = 'none';
-    document.getElementById('hover-info').textContent = 'HOVER OVER STATE';
-  });
-  path.addEventListener('click', function() {
-    document.querySelectorAll('.st').forEach(p=>p.classList.remove('sel'));
-    this.classList.add('sel');
-    document.getElementById('sel-state').textContent = this.dataset.state.toUpperCase();
-    fetchStateDetail(this.dataset.state);
-  });
-});
-
-function onCityClick(state) {
-  fetchStateDetail(state);
+function loadMilitaryData() {
+  enqueue('mildata',
+    'India defence analyst. Return ONLY JSON.',
+    'India active military threats 2025-26. Return JSON: {"threats":[{"zone":"LOC (J&K)","level":"HIGH","type":"Cross-border infiltration","incidents_ytd":47},{"zone":"LAC (Ladakh)","level":"ELEVATED","type":"China standoff","incidents_ytd":12},{"zone":"Naxal Belt","level":"HIGH","type":"LWE insurgency","incidents_ytd":89},{"zone":"NE Insurgency","level":"MODERATE","type":"ULFA/NSCN","incidents_ytd":23}]}. Use real 2025 data.',
+    280,
+    txt => {
+      const d = jParse(txt);
+      if (d && d.threats) {
+        layerData.military = d.threats;
+        document.getElementById('lc-military').textContent = d.threats.length;
+      }
+    }
+  );
 }
 
-function showStatePopup(d) {
+function loadGeoData() {
+  enqueue('geodata',
+    'India geopolitics analyst. Return ONLY JSON.',
+    'India geopolitical pressure points 2025-26. JSON: {"pressures":[{"country":"China","issue":"LAC+Belt&Road","pressure":"HIGH"},{"country":"Pakistan","issue":"LOC+Terror","pressure":"HIGH"},{"country":"USA","issue":"Trade+H1B","pressure":"MODERATE"},{"country":"Bangladesh","issue":"Refugee+Water","pressure":"MODERATE"}]}',
+    240,
+    txt => {
+      const d = jParse(txt);
+      if (d && d.pressures) {
+        layerData.geo = d.pressures;
+        document.getElementById('lc-geo').textContent = d.pressures.length;
+      }
+    }
+  );
+}
+
+function loadWaterData() {
+  enqueue('water',
+    'India water analyst. Return ONLY JSON.',
+    'India water stress regions 2025. JSON: {"regions":[{"name":"Marathwada","state":"Maharashtra","severity":"CRITICAL","reason":"3yr drought"},{"name":"Bundelkhand","state":"UP/MP","severity":"HIGH","reason":"low GW"},{"name":"Rajasthan Desert","state":"Rajasthan","severity":"CRITICAL","reason":"arid zone"}]}',
+    240,
+    txt => {
+      const d = jParse(txt);
+      if (d) document.getElementById('lc-water').textContent = (d.regions||[]).length;
+    }
+  );
+}
+
+function loadDeforestData() {
+  enqueue('deforest',
+    'India environment analyst. Return ONLY JSON.',
+    'India deforestation hotspots 2024-25. JSON: {"zones":[{"name":"Northeast Forests","state":"Assam/Meghalaya","loss":"45k ha/yr","cause":"Jhum+Roads"},{"name":"Chhattisgarh Mines","state":"Chhattisgarh","loss":"22k ha/yr","cause":"Coal mining"},{"name":"MP Forests","state":"Madhya Pradesh","loss":"18k ha/yr","cause":"Agriculture"}]}',
+    240,
+    txt => {
+      const d = jParse(txt);
+      if (d) document.getElementById('lc-deforest').textContent = (d.zones||[]).length;
+    }
+  );
+}
+
+function loadExportData() {
+  enqueue('exports',
+    'India trade analyst. Return ONLY JSON.',
+    'India top export clusters/hubs 2025-26. JSON: {"hubs":[{"city":"Mumbai","type":"Finance+Pharma","value":"$82B"},{"city":"Bengaluru","type":"IT Software","value":"$55B"},{"city":"Surat","type":"Diamonds+Textiles","value":"$34B"},{"city":"Mundra","type":"Port+Petrochem","value":"$28B"}]}',
+    240,
+    txt => {
+      const d = jParse(txt);
+      if (d) document.getElementById('lc-exports').textContent = (d.hubs||[]).length;
+    }
+  );
+}
+
+function loadStateDetail(stateName) {
+  showB(`FETCHING ${stateName.toUpperCase()}...`);
+  enqueue('state_'+stateName,
+    'Indian state governance analyst. Return ONLY valid JSON.',
+    `Latest data for ${stateName}, India. Return JSON: {"state":"${stateName}","capital":"city","cm":"Chief Minister name","pop":"Xer Cr","gdp":"X% of India","tax":"₹XL Cr","exp":"₹XL Cr","peace":65,"cases_ytd":12000,"strikes_ytd":45,"corruption":"HIGH/MODERATE/LOW","unemployment":"X%","literacy":"X%","projects":12}`,
+    280,
+    txt => {
+      const d = jParse(txt);
+      if (d) renderStatePopup(d);
+      hideB();
+    }
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+//  RENDERERS
+// ══════════════════════════════════════════════════════════
+
+function renderStatePopup(d) {
   document.getElementById('spop-name').textContent = (d.state||'STATE').toUpperCase();
+  document.getElementById('sel-state').textContent = (d.state||'').toUpperCase();
+  const pi = parseInt(d.peace)||50;
+  const pc = pi>70?'#22c55e':pi>50?'#fbbf24':'#f43f5e';
   document.getElementById('spop-grid').innerHTML = `
     <div class="ps"><div class="psl">CAPITAL</div><div class="psv">${d.capital||'--'}</div></div>
-    <div class="ps"><div class="psl">POPULATION</div><div class="psv">${d.population||'--'}</div></div>
-    <div class="ps"><div class="psl">GDP CONTRIB.</div><div class="psv">${d.gdp_contribution||'--'}</div></div>
-    <div class="ps"><div class="psl">TAX REVENUE</div><div class="psv">${d.tax_revenue||'--'}</div></div>
-    <div class="ps"><div class="psl">EXPENDITURE</div><div class="psv">${d.expenditure||'--'}</div></div>
-    <div class="ps"><div class="psl">PEACE INDEX</div><div class="psv">${d.peace_index||'--'}/100</div></div>
-    <div class="ps"><div class="psl">CHIEF MINISTER</div><div class="psv">${d.cm||'--'}</div></div>
-    <div class="ps"><div class="psl">LITERACY</div><div class="psv">${d.literacy||'--'}</div></div>`;
+    <div class="ps"><div class="psl">CHIEF MIN.</div><div class="psv" style="font-size:9px">${d.cm||'--'}</div></div>
+    <div class="ps"><div class="psl">POPULATION</div><div class="psv">${d.pop||'--'}</div></div>
+    <div class="ps"><div class="psl">TAX REV.</div><div class="psv">${d.tax||'--'}</div></div>
+    <div class="ps"><div class="psl">EXPENDITURE</div><div class="psv">${d.exp||'--'}</div></div>
+    <div class="ps"><div class="psl">GDP SHARE</div><div class="psv">${d.gdp||'--'}</div></div>
+    <div class="ps"><div class="psl">POLICE CASES</div><div class="psv">${(d.cases_ytd||0).toLocaleString()}</div></div>
+    <div class="ps"><div class="psl">STRIKES YTD</div><div class="psv">${d.strikes_ytd||'--'}</div></div>
+    <div class="ps"><div class="psl">CORRUPTION</div><div class="psv" style="color:${d.corruption==='HIGH'?'#f43f5e':d.corruption==='MODERATE'?'#fbbf24':'#22c55e'}">${d.corruption||'--'}</div></div>
+    <div class="ps"><div class="psl">UNEMPLOYMENT</div><div class="psv">${d.unemployment||'--'}</div></div>
+    <div class="ps"><div class="psl">LITERACY</div><div class="psv">${d.literacy||'--'}</div></div>
+    <div class="ps"><div class="psl">PROJECTS</div><div class="psv">${d.projects||'--'} active</div></div>`;
+  document.getElementById('pi-fill').style.cssText = `width:${pi}%;background:${pc};`;
+  document.getElementById('pi-val').textContent = pi + '/100';
+  document.getElementById('pi-val').style.color = pc;
   document.getElementById('spop').style.display = 'block';
-  hideBanner();
 }
 
-function closePopup() { document.getElementById('spop').style.display = 'none'; }
-
-// ══════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════
-function switchTab(tab, el) {
-  currentTab = tab;
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  if (el) el.classList.add('active');
-  document.querySelectorAll('.tab-l').forEach(t=>t.style.display='none');
-  document.querySelectorAll('.tab-r').forEach(t=>t.style.display='none');
-  const tl = document.getElementById('tl-'+tab);
-  const tr = document.getElementById('tr-'+tab);
-  if (tl) tl.style.display = 'block';
-  if (tr) tr.style.display = 'block';
-  // Trigger appropriate fetch if no data
-  if (tab === 'projects' && !liveData.projects) fetchProjects();
-  if (tab === 'peace'    && !liveData.peace)    fetchPeaceIndex();
-  if (tab === 'defence'  && !liveData.defence)  fetchDefence();
+function colorMapByTax(arr) {
+  document.querySelectorAll('.st').forEach(p=>{ p.style.fill='#0a1520'; });
+  if (!arr) return;
+  const max = Math.max(...arr.map(s=>s.pct||0));
+  const sm = {'Maharashtra':'st-MH','Karnataka':'st-KA','Delhi':'st-DL','Gujarat':'st-GJ',
+    'Tamil Nadu':'st-TN','Uttar Pradesh':'st-UP','Telangana':'st-TG','West Bengal':'st-WB',
+    'Rajasthan':'st-RJ','Madhya Pradesh':'st-MP','Andhra Pradesh':'st-AP','Bihar':'st-BR',
+    'Punjab':'st-PB','Haryana':'st-HR','Odisha':'st-OD','Chhattisgarh':'st-CG','Kerala':'st-KL'};
+  arr.forEach(s=>{
+    const id=sm[s.state]; if(!id)return;
+    const el=document.getElementById(id); if(!el)return;
+    const r=(s.pct||0)/(max||1);
+    if(r>.8)el.style.fill='#1e3d0c';
+    else if(r>.6)el.style.fill='#183209';
+    else if(r>.4)el.style.fill='#112606';
+    else if(r>.2)el.style.fill='#0d1d05';
+    else el.style.fill='#0a1520';
+  });
 }
 
-// ══════════════════════════════════════════════
-//  LAYER TOGGLES
-// ══════════════════════════════════════════════
-function toggleLayer(id, el) {
-  const chk  = el.querySelector('.lchk');
-  const on   = chk.style.opacity !== '0.3';
-  chk.style.opacity = on ? '0.3' : '1';
-  const layerMap = { tax:'city-layer', projects:'project-layer', alerts:'alert-layer' };
-  const lyr = document.getElementById(layerMap[id]);
-  if (lyr) lyr.style.display = on ? 'none' : 'block';
-}
-
-// ══════════════════════════════════════════════
-//  BANNER HELPERS
-// ══════════════════════════════════════════════
-function showBanner(msg) { const b = document.getElementById('map-status'); b.textContent = '⟳ '+msg; b.style.display = 'block'; }
-function hideBanner()    { document.getElementById('map-status').style.display = 'none'; }
-
-// ══════════════════════════════════════════════
-//  AI CHAT
-// ══════════════════════════════════════════════
-function toggleAI() {
-  const p = document.getElementById('ai-wrap');
-  p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
-}
-
-async function sendAI() {
-  const inp = document.getElementById('ai-in');
-  const msg = inp.value.trim(); if (!msg) return;
-  inp.value = '';
-  const msgs = document.getElementById('ai-msgs');
-  const ud = document.createElement('div'); ud.className='amsg u'; ud.textContent=msg; msgs.appendChild(ud);
-  const ld = document.createElement('div'); ld.className='amsg b ld'; ld.textContent='⟳ Searching live India data...'; msgs.appendChild(ld);
-  msgs.scrollTop = msgs.scrollHeight;
-  try {
-    const reply = await callAI(
-      `You are the Bharat Monitor AI Analyst — an expert on India's government, fiscal policy, state governance, mega projects, defence, and current affairs. Use web search to get current data. Be concise (3-5 sentences), precise, and use ₹ for INR. Today is March 2026.`,
-      msg, true, 500
-    );
-    ld.remove();
-    const bd = document.createElement('div'); bd.className='amsg b'; bd.textContent=reply; msgs.appendChild(bd);
-  } catch(e) {
-    ld.textContent = 'API error. Check connection.'; ld.style.color='#ff7777';
-  }
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-// ══════════════════════════════════════════════
-//  CREDITS
-// ══════════════════════════════════════════════
-function showCredits() { document.getElementById('cred-overlay').style.display='flex'; }
-function hideCredits() { document.getElementById('cred-overlay').style.display='none'; }
-
-// ══════════════════════════════════════════════
-//  COORDINATES ON MAP HOVER
-// ══════════════════════════════════════════════
-document.getElementById('svg-map').addEventListener('mousemove', function(e) {
-  const r = this.getBoundingClientRect();
-  const x = (e.clientX-r.left)/r.width;
-  const y = (e.clientY-r.top)/r.height;
-  document.getElementById('coords').textContent =
-    `${(38-y*30).toFixed(2)}°N ${(67+x*30).toFixed(2)}°E`;
+// ══════════════════════════════════════════════════════════
+//  MAP INTERACTION
+// ══════════════════════════════════════════════════════════
+document.querySelectorAll('.st').forEach(path=>{
+  path.addEventListener('mouseover',function(e){
+    document.getElementById('hinfo').textContent = this.dataset.state.toUpperCase() + ' — CLICK FOR LIVE DATA';
+    const tt=document.getElementById('tt');
+    tt.style.display='block';
+    tt.style.left=(e.clientX-220+10)+'px';
+    tt.style.top=(e.clientY-44+10)+'px';
+    tt.innerHTML=`<div class="tth">${this.dataset.state}</div><div style="font-size:9px;color:var(--dim);font-family:'Share Tech Mono',monospace">CLICK TO LOAD LIVE AI DATA</div>`;
+  });
+  path.addEventListener('mousemove',function(e){
+    const tt=document.getElementById('tt');
+    tt.style.left=(e.clientX-220+10)+'px';
+    tt.style.top=(e.clientY-44+10)+'px';
+  });
+  path.addEventListener('mouseout',function(){
+    document.getElementById('tt').style.display='none';
+    document.getElementById('hinfo').textContent='HOVER OVER STATE';
+  });
+  path.addEventListener('click',function(){
+    document.querySelectorAll('.st').forEach(p=>p.classList.remove('sel'));
+    this.classList.add('sel');
+    loadStateDetail(this.dataset.state);
+  });
 });
 
-// ══════════════════════════════════════════════
-//  REFRESH ENGINE
-// ══════════════════════════════════════════════
-async function refreshAll() {
-  const btn = document.getElementById('refresh-btn');
-  btn.textContent = '⟳ REFRESHING...';
-  btn.style.opacity = '0.7';
-  btn.disabled = true;
+function clickState(s){ loadStateDetail(s); }
+function closePopup(){ document.getElementById('spop').style.display='none'; }
 
-  // Update data freshness timestamp
-  document.getElementById('data-age').textContent = 'DATA: ' + new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit'}) + ' IST';
+document.getElementById('svg-map').addEventListener('mousemove',function(e){
+  const r=this.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+  document.getElementById('coords').textContent=`${(38-y*30).toFixed(2)}°N ${(67+x*30).toFixed(2)}°E`;
+});
 
-  // Run all fetches in parallel (grouped to avoid rate limits)
+// ══════════════════════════════════════════════════════════
+//  LAYER TOGGLES
+// ══════════════════════════════════════════════════════════
+function toggleLayer(name, el) {
+  const chk = el.querySelector('.lck');
+  const isOn = chk.classList.contains('on');
+  const layerEl = document.getElementById('layer-'+name);
+  if (!layerEl) return;
+
+  if (isOn) {
+    chk.classList.remove('on');
+    chk.style.background = '';
+    chk.textContent = '';
+    layerEl.style.display = 'none';
+  } else {
+    chk.classList.add('on');
+    chk.style.background = chk.style.borderColor;
+    chk.textContent = '✓';
+    chk.style.color = '#000';
+    layerEl.style.display = 'block';
+
+    // Lazy load data for this layer on first activation
+    if (name === 'military' && !cache['mildata']) loadMilitaryData();
+    if (name === 'geo' && !cache['geodata']) loadGeoData();
+    if (name === 'aqi' && !cache['aqi']) loadAQI();
+    if (name === 'rivers' && !cache['rivers']) loadRivers();
+    if (name === 'water' && !cache['water']) loadWaterData();
+    if (name === 'deforest' && !cache['deforest']) loadDeforestData();
+    if (name === 'exports' && !cache['exports']) loadExportData();
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  TAB NAVIGATION (TOP)
+// ══════════════════════════════════════════════════════════
+function navTab(name, el) {
+  currentNavTab = name;
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  if(el) el.classList.add('on');
+  // nothing to switch in layout — tab changes what's fetched
+}
+
+// ══════════════════════════════════════════════════════════
+//  RIGHT PANEL TABS
+// ══════════════════════════════════════════════════════════
+function rpTab(name, el) {
+  currentRpTab = name;
+  document.querySelectorAll('.rptb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.rp-tab-content').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('rpt-'+name).classList.add('on');
+  // Lazy load on first view
+  if(name==='rich') loadRich();
+  if(name==='ed') loadED();
+  if(name==='rivers') loadRivers();
+  if(name==='births') { loadVitals(); loadAQI(); }
+}
+
+// ══════════════════════════════════════════════════════════
+//  AI CHAT
+// ══════════════════════════════════════════════════════════
+function toggleAI(){
+  const p=document.getElementById('aip');
+  p.style.display=p.style.display==='flex'?'none':'flex';
+}
+
+async function sendAI(){
+  const inp=document.getElementById('ain');
+  const msg=inp.value.trim(); if(!msg)return;
+  inp.value='';
+  const msgs=document.getElementById('aims');
+  const ud=document.createElement('div');ud.className='am u';ud.textContent=msg;msgs.appendChild(ud);
+  const ld=document.createElement('div');ld.className='am b ld';ld.textContent='⟳ Searching live data...';msgs.appendChild(ld);
+  msgs.scrollTop=msgs.scrollHeight;
   try {
-    await Promise.allSettled([fetchOverview(), fetchAlerts(), fetchTicker()]);
-    await Promise.allSettled([fetchStateTax(), fetchExpenditure(), fetchSchemes()]);
-    await Promise.allSettled([fetchProjects(), fetchPeaceIndex(), fetchDefence()]);
-    await drawGSTChart();
-  } catch(e) { console.error('Refresh error:', e); }
-
-  hideBanner();
-  btn.textContent = '⟳ REFRESH NOW';
-  btn.style.opacity = '1';
-  btn.disabled = false;
-
-  // Schedule next refresh
-  scheduleNextRefresh();
+    const reply = await rawCall(
+      'You are Bharat Monitor AI — expert on India governance, finance, military, environment, corruption, rivers, AQI, elections. Use web search. Be concise (3-5 sentences). Use ₹ for INR. Today: March 2026.',
+      msg, 450
+    );
+    ld.remove();
+    const bd=document.createElement('div');bd.className='am b';bd.textContent=reply;msgs.appendChild(bd);
+  } catch(e){ ld.textContent='API error.';ld.style.color='#f43f5e'; }
+  msgs.scrollTop=msgs.scrollHeight;
 }
 
-function scheduleNextRefresh() {
-  if (refreshTimer) clearTimeout(refreshTimer);
-  nextRefreshTime = Date.now() + REFRESH_INTERVAL_MS;
-  refreshTimer = setTimeout(refreshAll, REFRESH_INTERVAL_MS);
+// ══════════════════════════════════════════════════════════
+//  CREDITS
+// ══════════════════════════════════════════════════════════
+function showCreds(){ document.getElementById('cov').style.display='flex'; }
+function hideCreds(){ document.getElementById('cov').style.display='none'; }
+
+// ══════════════════════════════════════════════════════════
+//  REFRESH ENGINE
+// ══════════════════════════════════════════════════════════
+function triggerRefresh(){
+  const btn=document.getElementById('rbtn');
+  btn.classList.add('spin');
+  btn.disabled=true;
+  // Clear cache for re-fetch
+  cache = {};
+  // Update data age
+  const now=new Date(Date.now()+5.5*3600000);
+  const p=n=>String(n).padStart(2,'0');
+  const ts=`${p(now.getUTCHours())}:${p(now.getUTCMinutes())} IST`;
+  document.getElementById('dage').textContent=ts;
+  document.getElementById('dage2').textContent='DATA: '+ts;
+  initLoad();
+  setTimeout(()=>{ btn.classList.remove('spin'); btn.disabled=false; }, 8000);
+  scheduleRefresh();
 }
 
-// ══════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════
+function scheduleRefresh(){
+  if(refreshTimeout) clearTimeout(refreshTimeout);
+  nextRefresh = Date.now() + REFRESH_INTERVAL;
+  refreshTimeout = setTimeout(triggerRefresh, REFRESH_INTERVAL);
+}
+
+// ══════════════════════════════════════════════════════════
+//  INIT — priority queue: critical first
+// ══════════════════════════════════════════════════════════
+function initLoad(){
+  // P1 — always visible on load
+  loadNatPulse();
+  loadAlertFeed();
+  // P2 — sidebar (visible)
+  loadStateTax();
+  loadPeaceIndex();
+  loadUnemp();
+  // P3 — right panel feed
+  loadCorrupt();
+  loadExp();
+  // P4 — background data for layers
+  loadMilitaryData();
+  loadGeoData();
+}
+
 window.addEventListener('load', () => {
-  // Init tab display
-  document.querySelectorAll('.tab-l').forEach((t,i)=>{ if(i>0) t.style.display='none'; });
-  document.querySelectorAll('.tab-r').forEach((t,i)=>{ if(i>0) t.style.display='none'; });
-
-  // Kick off full data load
-  refreshAll();
+  initLoad();
+  scheduleRefresh();
 });
 </script>
 </body>
